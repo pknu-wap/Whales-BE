@@ -1,62 +1,167 @@
 # Whales-BE
 2025-2 WAP 웹 6팀
 
-Whales Project 🐋
-📌 프로젝트 개요
+---
 
-Whales는 태그 기반 웹 커뮤니티 플랫폼으로,
-사용자가 관심사에 따라 게시판과 채팅방을 자유롭게 구성할 수 있도록 지원합니다.
+# 🐋 Whales Project
 
-프론트엔드: React + TypeScript
+> **태그 기반 커뮤니티 플랫폼**
+> 관심사에 맞춘 게시판, 채팅, 알림을 제공하는 웹 프로젝트
 
-백엔드: Spring Boot + PostgreSQL
+---
 
-배포: Docker, AWS (예정)
+## 📌 프로젝트 개요
 
-✨ 주요 기능
+Whales는 **대학생 맞춤형 태그 기반 커뮤니티**로,
+사용자가 원하는 태그를 기준으로 게시글을 검색/정렬하고,
+관심사에 따라 게시판과 채팅방을 즐겨찾기할 수 있도록 지원합니다.
 
-사용자 인증 (회원가입, 로그인, JWT/OAuth2)
+---
 
-게시판 & 댓글
+## ✨ 주요 기능
 
-태그 기반 관심사 필터링
+* 🔑 **인증**
 
-실시간 채팅
+  * 구글 OAuth2 로그인 (@pukyong.ac.kr 이메일 제한)
+  * JWT 기반 인증/인가
+* 📝 **게시판 & 댓글**
 
-알림 시스템
+  * 게시글 CRUD
+  * 댓글, 좋아요/싫어요, 스크랩
+* 🏷 **태그 기반 기능**
 
-🛠 기술 스택
+  * 게시판 사용자화 (태그별 즐겨찾기)
+  * 태그 기반 게시글 목록 조회
+  * 태그별 채팅방 생성
+* 🔔 **알림 시스템**
 
-Frontend: React, TypeScript
+  * 댓글/좋아요 실시간 알림
+* 📷 **파일 업로드 (확장 예정)**
 
-Backend: Spring Boot, JPA, PostgreSQL, Redis
+  * AWS S3 이미지 업로드 지원
 
-Infra/DevOps: Docker, AWS
+---
 
-Tools: GitHub Projects, Swagger
+## 🛠 기술 스택
 
-🚀 실행 방법
-# 프론트엔드 실행
+### Frontend
+
+* React, TypeScript
+
+### Backend
+
+* Spring Boot 3.x
+* Spring Security (JWT + OAuth2)
+* JPA (Hibernate)
+* PostgreSQL
+* Redis
+* Websocket
+
+### Infra & DevOps
+
+* Docker / Docker Compose
+* AWS EC2 (서버 배포), AWS S3 (이미지 저장)
+* GitHub Actions (CI/CD)
+
+### Tools
+
+* GitHub
+* Notion
+* Swagger
+* Figma
+
+---
+
+## 🗂 프로젝트 구조 (예정)
+
+```
+whales/
+├── frontend/       # React + TypeScript
+├── backend/        # Spring Boot + PostgreSQL
+├── docs/           # 문서 (ERD, API 명세 등)
+└── docker-compose.yml
+```
+
+---
+
+## 🛠 실행 방법
+
+### 프론트엔드
+
+```bash
 cd frontend
 npm install
 npm run dev
+```
 
-# 백엔드 실행
+### 백엔드
+
+```bash
 cd backend
 ./gradlew bootRun
+```
 
-📅 개발 일정
+### Docker (전체 실행)
 
-9월 2주 ~ 11월 1주: 핵심 기능 개발 + 배포
+```bash
+docker-compose up --build
+```
 
-11월 1주: 중간 발표
+---
 
-11월 2주 ~ 11월 4주: 확장 기능 개발 및 안정화
+## 🗃 데이터베이스 ERD (예시)
 
-🤝 기여 규칙
+👉 [ERD Diagram](docs/erd.png)
 
-브랜치 전략: Git Flow
+(📌 실제 ERD 이미지 첨부 예정)
 
-커밋 컨벤션: Conventional Commits
+---
 
-PR은 최소 1명 리뷰 후 머지
+## 📑 API 문서
+
+👉 Swagger UI 실행 후 확인 가능
+
+```
+http://localhost:8080/swagger-ui/index.html
+```
+
+---
+
+## 📅 개발 일정
+
+| 기간               | 목표       | 상세                           |
+| ---------------- | -------- | ---------------------------- |
+| 9월 2주 \~ 3주      | 초기 세팅    | GitHub, Docker, DB 설계        |
+| 9월 4주 \~ 10월 3주  | MVP 개발   | 로그인/회원가입, 게시판 CRUD, 태그 기반 검색 |
+| 10월 4주 \~ 11월 1주 | 배포 및 테스트 | 배포 환경 세팅, QA 진행              |
+| 11월 1주           | 중간 발표    | MVP 기능 시연                    |
+| 11월 2주 \~ 11월 5주 | 확장 기능    | 태그별 채팅, 실시간 알림, 이미지 업로드      |
+
+---
+
+## 🤝 협업 규칙
+
+### Git 브랜치 전략
+
+* `main`: 배포용
+* `develop`: 개발 통합 브랜치
+* `feature/*`: 기능 단위 개발
+* `hotfix/*`: 긴급 수정
+
+### 커밋 컨벤션 (Conventional Commits)
+
+* `feat:` 새로운 기능 추가
+* `fix:` 버그 수정
+* `docs:` 문서 수정
+* `style:` 코드 포맷팅 (기능 변화 없음)
+* `refactor:` 리팩토링
+* `test:` 테스트 코드
+
+---
+
+## 🚀 배포 URL
+
+* (예정) [https://whales.app](https://whales.app)
+
+---
+
