@@ -33,7 +33,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             final String token = authHeader.substring(7); // "Bearer " 이후 문자열
 
-            if (jwtUtil.validateAccessToken(token)) {
+            if (jwtUtil.validateToken(token)) {
                 String email = jwtUtil.getUserEmailFromToken(token);
                 User user = userRepository.findByEmail(email).orElse(null);
 
