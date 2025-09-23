@@ -1,10 +1,10 @@
-package com.example.whales.service;
+package com.example.whales.auth;
 
-import com.example.whales.dto.request.LoginRequestDto;
-import com.example.whales.dto.request.SignupRequestDto;
-import com.example.whales.dto.response.LoginResponseDto;
-import com.example.whales.entity.User;
-import com.example.whales.repository.UserRepository;
+import com.example.whales.api.dto.request.LoginRequest;
+import com.example.whales.api.dto.request.SignupRequest;
+import com.example.whales.api.dto.response.LoginResponse;
+import com.example.whales.domain.user.User;
+import com.example.whales.domain.user.UserRepository;
 import com.example.whales.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,7 +18,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
 
-    public void signup(SignupRequestDto request) {
+    public void signup(SignupRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new RuntimeException("Username is already in use");
         }
@@ -35,7 +35,7 @@ public class AuthService {
         userRepository.save(user);
     }
 
-    public LoginResponseDto login(LoginRequestDto request) {
+    public LoginResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -46,10 +46,10 @@ public class AuthService {
         String accessToken = jwtUtil.generateAccessToken(user);
         String refreshToken = jwtUtil.generateRefreshToken(user);
 
-        return new LoginResponseDto(accessToken, refreshToken);
+        return new LoginResponse(accessToken, refreshToken);
     }
 
-    public LoginResponseDto refreshToken(String refreshToken) {
+    public LoginResponse refreshToken(String refreshToken) {
         if(!jwtUtil.validateToken(refreshToken)) {
             throw new RuntimeException("Invalid refresh token");
         }
@@ -61,6 +61,6 @@ public class AuthService {
         String newAccessToken = jwtUtil.generateAccessToken(user);
         String newRefreshToken = jwtUtil.generateRefreshToken(user);
 
-        return new LoginResponseDto(newAccessToken, newRefreshToken);
+        return new LoginResponse(newAccessToken, newRefreshToken);
     }
 }

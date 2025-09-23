@@ -1,4 +1,4 @@
-package com.example.whales.dto.request;
+package com.example.whales.api.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class LoginRequestDto {
+public class SignupRequest {
+    private String username;
     private String email;
     private String password;
+    private String provider;
 }

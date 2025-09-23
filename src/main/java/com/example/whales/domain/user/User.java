@@ -1,4 +1,4 @@
-package com.example.whales.entity;
+package com.example.whales.domain.user;
 
 import jakarta.persistence.*;
 import lombok.*;
