@@ -37,6 +37,10 @@ public class User {
     @Column(nullable = false)
     private UserStatus status = UserStatus.ACTIVE;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable=false, length=16)
+    private UserRole role = UserRole.USER;
+
     @Column(name = "avatar_url", columnDefinition = "TEXT")
     private String avatarUrl;
 
