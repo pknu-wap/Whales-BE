@@ -1,7 +1,7 @@
-package com.example.whales.security;
+package com.whales.security;
 
-import com.example.whales.domain.user.User;
-import com.example.whales.domain.user.UserRepository;
+import com.whales.domain.user.User;
+import com.whales.domain.user.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

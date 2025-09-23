@@ -1,9 +1,9 @@
-package com.example.whales.api;
+package com.whales.api;
 
-import com.example.whales.api.dto.request.LoginRequest;
-import com.example.whales.api.dto.request.SignupRequest;
-import com.example.whales.api.dto.response.LoginResponse;
-import com.example.whales.auth.AuthService;
+import com.whales.api.dto.request.LoginRequest;
+import com.whales.api.dto.request.SignupRequest;
+import com.whales.api.dto.response.LoginResponse;
+import com.whales.auth.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

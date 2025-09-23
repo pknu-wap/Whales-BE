@@ -1,6 +1,6 @@
-package com.example.whales.security;
+package com.whales.security;
 
-import com.example.whales.domain.user.User;
+import com.whales.domain.user.User;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;

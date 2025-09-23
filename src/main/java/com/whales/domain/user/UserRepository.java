@@ -1,4 +1,4 @@
-package com.example.whales.domain.user;
+package com.whales.domain.user;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
