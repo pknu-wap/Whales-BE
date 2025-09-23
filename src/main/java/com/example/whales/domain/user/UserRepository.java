@@ -1,6 +1,5 @@
-package com.example.whales.repository;
+package com.example.whales.domain.user;
 
-import com.example.whales.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

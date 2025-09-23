@@ -1,9 +1,9 @@
-package com.example.whales.controller;
+package com.example.whales.api;
 
-import com.example.whales.dto.request.LoginRequestDto;
-import com.example.whales.dto.request.SignupRequestDto;
-import com.example.whales.dto.response.LoginResponseDto;
-import com.example.whales.service.AuthService;
+import com.example.whales.api.dto.request.LoginRequest;
+import com.example.whales.api.dto.request.SignupRequest;
+import com.example.whales.api.dto.response.LoginResponse;
+import com.example.whales.auth.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,18 +21,18 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/signup")
-    public ResponseEntity<String> signup(@RequestBody SignupRequestDto request) {
+    public ResponseEntity<String> signup(@RequestBody SignupRequest request) {
         authService.signup(request);
         return ResponseEntity.ok("User registered successfully");
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponseDto> login(@RequestBody LoginRequestDto request) {
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
         return ResponseEntity.ok(authService.login(request));
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<LoginResponseDto> refresh(@RequestBody Map<String, String> request) {
+    public ResponseEntity<LoginResponse> refresh(@RequestBody Map<String, String> request) {
         String refreshToken = request.get("refreshToken");
         return ResponseEntity.ok(authService.refreshToken(refreshToken));
     }
