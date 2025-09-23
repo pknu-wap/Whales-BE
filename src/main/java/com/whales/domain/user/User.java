@@ -1,44 +1,66 @@
 package com.whales.domain.user;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.util.UUID;
 
 @Entity
-@Table(name = "users")
-@Getter @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Table(
+        name = "users",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_users_email", columnNames = "email")
+        }
+)
+@Getter
+@Setter
 public class User {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue
+    private UUID id;
 
-    @Column(nullable = false, unique = true)
-    private String username;
-
+    // email: CITEXT + @pukyong.ac.kr 체크 (DB 제약조건에서 보장)
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false)
-    private String password;
+    @Column(name = "display_name", length = 40, nullable = false)
+    private String displayName;
 
-    @Column(nullable = false)
-    private String provider;    // Local, Google 등 -> Google로 고정될 듯
+    // 닉네임 색상 캐시 (UI 표시용)
+    @Column(name = "nickname_color", length = 16, nullable = false)
+    private String nicknameColor = "Gray";
 
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private UserStatus status = UserStatus.ACTIVE;
+
+    @Column(name = "avatar_url", columnDefinition = "TEXT")
+    private String avatarUrl;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Instant createdAt = Instant.now();
+
+    @Column(name = "updated_at", nullable = false)
+    private Instant updatedAt = Instant.now();
+
+    @Column(name = "deleted_at")
+    private Instant deletedAt;
 
     @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
+    void onCreate() {
+        this.createdAt = Instant.now();
+        this.updatedAt = Instant.now();
     }
 
     @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
+    void onUpdate() {
+        this.updatedAt = Instant.now();
+    }
+
+    public boolean isDeleted() {
+        return deletedAt != null;
     }
 }
