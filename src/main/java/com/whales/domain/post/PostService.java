@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -41,12 +42,13 @@ public class PostService {
         return postRepository.save(post);
     }
 
-    // 게시글 삭제 (Soft delete)
-    public void deletePost(UUID postId) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("Post not found"));
+    public void deletePost(UUID id) {
+        // ID로 게시물을 찾아옵니다. (삭제되지 않은 게시물만)
+        Post post = postRepository.findByIdAndDeletedAtIsNull(id)
+                .orElseThrow(() -> new IllegalArgumentException("해당 ID의 게시물이 없습니다."));
 
+        // deletedAt 필드에 현재 시간을 설정하여 논리적으로 삭제합니다.
         post.setDeletedAt(Instant.now());
-        postRepository.save(post);
+        postRepository.save(post); // UPDATE 쿼리 실행됨
     }
 }
