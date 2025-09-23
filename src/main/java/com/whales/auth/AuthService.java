@@ -1,11 +1,11 @@
-package com.example.whales.auth;
+package com.whales.auth;
 
-import com.example.whales.api.dto.request.LoginRequest;
-import com.example.whales.api.dto.request.SignupRequest;
-import com.example.whales.api.dto.response.LoginResponse;
-import com.example.whales.domain.user.User;
-import com.example.whales.domain.user.UserRepository;
-import com.example.whales.security.JwtUtil;
+import com.whales.api.dto.request.LoginRequest;
+import com.whales.api.dto.request.SignupRequest;
+import com.whales.api.dto.response.LoginResponse;
+import com.whales.domain.user.User;
+import com.whales.domain.user.UserRepository;
+import com.whales.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
