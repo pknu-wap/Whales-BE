@@ -28,6 +28,4 @@ spring:
 jwt:
   secret: ajkd-seofkf-wkc-woer-aloesr-ken-seknv-aseoie-wef
   access:
-    expiration: 3600000 # 1hour
-  refresh:
-    expiration: 604800000 # 7days
+    expiration: 900000 # 15m
