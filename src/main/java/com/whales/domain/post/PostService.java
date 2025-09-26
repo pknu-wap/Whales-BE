@@ -1,12 +1,12 @@
 package com.whales.domain.post;
 
+import com.whales.api.dto.request.PostRequest;
 import com.whales.domain.user.User;
 import com.whales.domain.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -17,14 +17,14 @@ public class PostService {
     private final UserRepository userRepository;
 
     // 게시글 생성
-    public Post createPost(Long userId, String title, String content) {
-        User author = userRepository.findById(userId)
+    public Post createPost(PostRequest request) {
+        User author = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
         Post post = new Post();
         post.setAuthor(author);
-        post.setTitle(title);
-        post.setContent(content);
+        post.setTitle(request.getTitle());
+        post.setContent(request.getContent());
         post.setStatus(ContentStatus.ACTIVE);
 
         return postRepository.save(post);
