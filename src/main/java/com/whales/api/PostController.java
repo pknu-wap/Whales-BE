@@ -1,5 +1,8 @@
-package com.whales.domain.post;
+package com.whales.api;
 
+import com.whales.api.dto.request.PostRequest;
+import com.whales.domain.post.Post;
+import com.whales.domain.post.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,10 +17,8 @@ public class PostController {
     private final PostService postService;
 
     @PostMapping
-    public ResponseEntity<Post> createPost(@RequestParam Long userId,
-                                           @RequestParam String title,
-                                           @RequestParam String content) {
-        return ResponseEntity.ok(postService.createPost(userId, title, content));
+    public ResponseEntity<Post> createPost(@RequestBody PostRequest request) {
+        return ResponseEntity.ok(postService.createPost(request));
     }
 
     @PutMapping("/{id}")
