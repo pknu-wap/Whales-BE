@@ -60,6 +60,10 @@ dependencies {
 	// Dev
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+	// .env 자동으로 읽어줌
+	implementation "me.paulschwarz:spring-dotenv:4.0.0"
+
 }
 
 tasks.named('test') {
