@@ -30,7 +30,7 @@ public class AuthService {
      * 4) Access JWT 발급
      */
     @Transactional
-    public TokenResponse loginWithGooogle(GoogleLoginRequest request) {
+    public TokenResponse loginWithGoogle(GoogleLoginRequest request) {
         // 구글 교환
         GoogleOAuthService.GoogleUser googleUser = googleOAuthService.exchange(request.code(), request.redirectUri());
 
