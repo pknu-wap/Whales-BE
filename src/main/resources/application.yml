@@ -8,9 +8,9 @@ spring:
     name: whales
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/whales_db
-    username: postgres
-    password: tnghks123
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -26,6 +26,14 @@ spring:
       mode: always
 
 jwt:
-  secret: ajkd-seofkf-wkc-woer-aloesr-ken-seknv-aseoie-wef
+  secret: ${JWT_SECRET}
   access:
-    expiration: 900000 # 15m
+    expiration: ${JWT_ACCESS_EXPIRATION}
+
+oauth2:
+  google:
+    client-id: ${GOOGLE_CLIENT_ID}
+    client-secret: ${GOOGLE_CLIENT_SECRET}
+    token-uri: ${GOOGLE_TOKEN_URI}
+    userinfo-uri: ${GOOGLE_USERINFO_URI}
+    redirect-uri: ${GOOGLE_REDIRECT_URI}
