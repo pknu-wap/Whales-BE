@@ -1,54 +1,86 @@
 package com.whales.domain.post;
 
 import com.whales.api.dto.request.PostRequest;
+import com.whales.api.dto.response.PostResponse;
 import com.whales.domain.user.User;
 import com.whales.domain.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class PostService {
 
     private final PostRepository postRepository;
-    private final UserRepository userRepository;
+    private final UserRepository userRepository; // User 엔티티를 찾기 위해 필요
 
-    // 게시글 생성
-    public Post createPost(PostRequest request) {
-        User author = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
-
-        Post post = new Post();
-        post.setAuthor(author);
-        post.setTitle(request.getTitle());
-        post.setContent(request.getContent());
-        post.setStatus(ContentStatus.ACTIVE);
-
-        return postRepository.save(post);
+    // 전체 조회
+    public List<PostResponse> getAllPosts() {
+        return postRepository.findAll()
+                .stream()
+                .map(PostResponse::from)
+                .collect(Collectors.toList());
     }
 
-    // 게시글 수정
-    public Post updatePost(UUID postId, String title, String content) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("Post not found"));
-
-        post.setTitle(title);
-        post.setContent(content);
-        post.setUpdatedAt(Instant.now());
-
-        return postRepository.save(post);
+    // 상세 조회
+    public PostResponse getPostById(UUID id) {
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Post not found with id: " + id));
+        return PostResponse.from(post);
     }
 
+    /**
+     * 게시글 생성: PostRequest DTO를 받아 DTO 내의 userId를 사용하여 Post 엔티티를 생성합니다.
+     */
+    @Transactional
+    public PostResponse createPost(PostRequest request) {
+        // DTO에서 userId를 추출하여 작성자(User) 엔티티를 찾습니다.
+        UUID authorId = request.getUserId();
+        if (authorId == null) {
+            throw new IllegalArgumentException("User ID must be provided in the request body.");
+        }
+
+        User author = userRepository.findById(authorId)
+                .orElseThrow(() -> new IllegalArgumentException("Author not found with id: " + authorId));
+
+        // Post 엔티티를 생성하고 DTO와 User 객체로 데이터를 채웁니다.
+        Post newPost = new Post();
+        newPost.setTitle(request.getTitle());
+        newPost.setContent(request.getContent());
+        newPost.setAuthor(author); // 작성자 연결 (author_id NOT NULL 제약조건 해결)
+
+        Post saved = postRepository.save(newPost);
+        return PostResponse.from(saved);
+    }
+
+    /**
+     * 게시글 수정: DTO를 사용하여 안전하게 제목과 내용만 업데이트합니다.
+     */
+    @Transactional
+    public PostResponse updatePost(UUID id, PostRequest request) {
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Post not found with id: " + id));
+
+        // DTO의 데이터를 사용하여 업데이트
+        if (request.getTitle() != null) post.setTitle(request.getTitle());
+        if (request.getContent() != null) post.setContent(request.getContent());
+
+        Post saved = postRepository.save(post);
+        return PostResponse.from(saved);
+    }
+
+    // 삭제
+    @Transactional
     public void deletePost(UUID id) {
-        // ID로 게시물을 찾아옵니다. (삭제되지 않은 게시물만)
-        Post post = postRepository.findByIdAndDeletedAtIsNull(id)
-                .orElseThrow(() -> new IllegalArgumentException("해당 ID의 게시물이 없습니다."));
-
-        // deletedAt 필드에 현재 시간을 설정하여 논리적으로 삭제합니다.
-        post.setDeletedAt(Instant.now());
-        postRepository.save(post); // UPDATE 쿼리 실행됨
+        if (!postRepository.existsById(id)) {
+            throw new IllegalArgumentException("Post not found with id: " + id);
+        }
+        postRepository.deleteById(id);
     }
 }

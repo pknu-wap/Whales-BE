@@ -11,5 +11,5 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
     Optional<Post> findByIdAndDeletedAtIsNull(UUID id);
 
     // 모든 게시물을 찾되, deletedAt이 NULL인 (삭제되지 않은) 게시물만 찾습니다.
-    // List<Post> findAllByDeletedAtIsNull();
+    //List<Post> findAllByDeletedAtIsNull();
 }
