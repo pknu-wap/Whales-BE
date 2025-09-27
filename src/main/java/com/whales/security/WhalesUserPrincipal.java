@@ -1,6 +1,6 @@
 package com.whales.security;
 
-import com.whales.domain.user.User;
+import com.whales.user.domain.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
