@@ -9,8 +9,12 @@ import com.whales.user.domain.UserRole;
 import com.whales.security.JwtUtil;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.Response;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Locale;
 import java.util.Optional;
@@ -23,6 +27,9 @@ public class AuthService {
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
 
+    @Value("${jwt.access.expiration}")
+    private long accessExpirationMs;
+
     /**
      * 구글 OAuth2 로그인 (Access 토큰만 발급, Refresh는 아직 미적용)
      * 1) code → token → userinfo
@@ -32,19 +39,26 @@ public class AuthService {
      */
     @Transactional
     public TokenResponse loginWithGoogle(GoogleLoginRequest request) {
-        // 구글 교환
+        if (request == null || request.code() == null || request.redirectUri() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "code/redirectUri is required");
+        }
+        // 1) 구글 교환
         GoogleOAuthService.GoogleUser googleUser = googleOAuthService.exchange(request.code(), request.redirectUri());
 
-        // 검증
-        if (googleUser == null || googleUser.getEmail() == null || !googleUser.isEmailVerified()) {
-            throw new IllegalArgumentException("Google email not verified");
+        // 2) 검증
+        if (googleUser == null || googleUser.getEmail() == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Failed to fetch Google userinfo");
         }
-        String email = googleUser.getEmail().toLowerCase(Locale.ROOT);
-        if (!email.endsWith("@pukyong.ac.kr")) {
-            throw new IllegalArgumentException("Google email does not end with '@pukyong.ac.kr'");
+        if (!googleUser.isEmailVerified()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Google email not verified");
         }
 
-        // upsert
+        String email = googleUser.getEmail().toLowerCase(Locale.ROOT);
+        if (!email.endsWith("@pukyong.ac.kr")) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Google email does not end with '@pukyong.ac.kr'");
+        }
+
+        // 3) upsert
         Optional<User> foundUser = userRepository.findByEmail(email);
         User user;
         if (foundUser.isPresent()) {
@@ -61,13 +75,15 @@ public class AuthService {
         }
 
         if (user.getId() == null) {
-            throw new EntityNotFoundException("Failed to persist user.");
+            // 영속화 실패 → 500
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to persist user");
         }
 
+        // 4) JWT 발급
         String role = user.getRole().name().toLowerCase(Locale.ROOT);
         String accessToken = jwtUtil.generateAccessToken(user.getId(), user.getEmail(), role);
 
-        long expiresInSeconds = 900L; // 동일 값으로 프론트와 약속
+        long expiresInSeconds = Math.floorDiv(accessExpirationMs, 1000L); // ms → s
         return new TokenResponse(accessToken, expiresInSeconds);
     }
 }

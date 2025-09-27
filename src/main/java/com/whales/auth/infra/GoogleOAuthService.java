@@ -4,12 +4,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class GoogleOAuthService {
@@ -53,7 +55,7 @@ public class GoogleOAuthService {
                 .body(GoogleToken.class);
 
         if (token == null || token.getAccessToken() == null) {
-            throw new IllegalStateException("Failed to obtain Google access token");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Failed to obtain Google access token");
         }
 
         GoogleUser user = http.get()
@@ -63,7 +65,7 @@ public class GoogleOAuthService {
                 .body(GoogleUser.class);
 
         if (user == null) {
-            throw new IllegalStateException("Failed to fetch Google userinfo");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Failed to fetch Google userinfo");
         }
         return user;
     }
