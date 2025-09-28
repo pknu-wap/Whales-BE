@@ -1,7 +1,6 @@
 package com.whales.post.application;
 
 import com.whales.post.api.CreatePostRequest;
-import com.whales.post.api.PostRequest;
 import com.whales.post.api.PostResponse;
 import com.whales.post.api.UpdatePostRequest;
 import com.whales.post.domain.Post;
