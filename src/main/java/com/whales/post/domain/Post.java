@@ -1,5 +1,6 @@
 package com.whales.post.domain;
 
+import com.whales.common.ContentStatus;
 import com.whales.user.domain.User;
 import jakarta.persistence.*;
 import lombok.Getter;
