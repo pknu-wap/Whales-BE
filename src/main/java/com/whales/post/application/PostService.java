@@ -1,7 +1,8 @@
 package com.whales.post.application;
 
-import com.whales.post.api.PostRequest;
+import com.whales.post.api.CreatePostRequest;
 import com.whales.post.api.PostResponse;
+import com.whales.post.api.UpdatePostRequest;
 import com.whales.post.domain.Post;
 import com.whales.post.domain.PostRepository;
 import com.whales.user.domain.User;
@@ -28,7 +29,7 @@ public class PostService {
     public List<PostResponse> getAllPosts() {
         return postRepository.findAll()
                 .stream()
-                .map(PostResponse::from)
+                .map(this::toPostResponse)
                 .collect(Collectors.toList());
     }
 
@@ -37,15 +38,14 @@ public class PostService {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Post not found with id: " + id));
-        return PostResponse.from(post);
+        return toPostResponse(post);
     }
 
     /**
      * 게시글 생성
      */
     @Transactional
-    public PostResponse createPost(PostRequest request) {
-        UUID authorId = request.getUserId();
+    public PostResponse createPost(UUID authorId, CreatePostRequest request) {
         if (authorId == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID must be provided in the request body");
         }
@@ -55,28 +55,28 @@ public class PostService {
                         HttpStatus.NOT_FOUND, "Author not found with id: " + authorId));
 
         Post newPost = new Post();
-        newPost.setTitle(request.getTitle());
-        newPost.setContent(request.getContent());
+        newPost.setTitle(request.title());
+        newPost.setContent(request.content());
         newPost.setAuthor(author);
 
         Post saved = postRepository.save(newPost);
-        return PostResponse.from(saved);
+        return toPostResponse(saved);
     }
 
     /**
      * 게시글 수정
      */
     @Transactional
-    public PostResponse updatePost(UUID id, PostRequest request) {
+    public PostResponse updatePost(UUID id, UpdatePostRequest request) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Post not found with id: " + id));
 
-        if (request.getTitle() != null) post.setTitle(request.getTitle());
-        if (request.getContent() != null) post.setContent(request.getContent());
+        if (request.title() != null) post.setTitle(request.title());
+        if (request.content() != null) post.setContent(request.content());
 
         Post saved = postRepository.save(post);
-        return PostResponse.from(saved);
+        return toPostResponse(saved);
     }
 
     // 삭제
@@ -86,5 +86,16 @@ public class PostService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found with id: " + id);
         }
         postRepository.deleteById(id);
+    }
+
+    private PostResponse toPostResponse(Post post) {
+        return new PostResponse(
+                post.getId(),
+                post.getTitle(),
+                post.getContent(),
+                post.getAuthor().getDisplayName(),
+                post.getCreatedAt(),
+                post.getUpdatedAt()
+        );
     }
 }

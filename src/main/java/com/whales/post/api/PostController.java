@@ -1,8 +1,10 @@
 package com.whales.post.api;
 
 import com.whales.post.application.PostService;
+import com.whales.security.WhalesUserPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -34,9 +36,9 @@ public class PostController {
      * 작성자 ID는 DTO 본문(userId)에서 직접 가져옵니다.
      */
     @PostMapping
-    public ResponseEntity<PostResponse> createPost(@RequestBody PostRequest request) {
-        // PostService는 DTO 내의 userId를 사용하여 작성자를 찾습니다.
-        PostResponse newPost = postService.createPost(request);
+    public ResponseEntity<PostResponse> createPost(@AuthenticationPrincipal WhalesUserPrincipal principal,
+                                                   @RequestBody CreatePostRequest request) {
+        PostResponse newPost = postService.createPost(principal.getId(), request);
         return ResponseEntity.ok(newPost);
     }
 
@@ -46,9 +48,8 @@ public class PostController {
     @PatchMapping("/{postId}")
     public ResponseEntity<PostResponse> updatePost(
             @PathVariable UUID postId,
-            @RequestBody PostRequest request
+            @RequestBody UpdatePostRequest request
     ) {
-        // DTO에는 userId가 포함될 수 있지만, 수정 시에는 postId만 사용하여 게시글을 찾습니다.
         PostResponse updated = postService.updatePost(postId, request);
         return ResponseEntity.ok(updated);
     }
