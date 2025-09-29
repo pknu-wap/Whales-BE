@@ -1,6 +1,7 @@
-package com.whales.post.domain;
+package com.whales.comment.domain;
 
 import com.whales.common.ContentStatus;
+import com.whales.post.domain.Post;
 import com.whales.user.domain.User;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -10,28 +11,36 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table(name = "posts")
+@Table(name = "comments")
 @Getter
 @Setter
-public class Post {
+public class Comment {
 
     @Id
     @GeneratedValue
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "author_id", nullable = false,
-            foreignKey = @ForeignKey(ConstraintMode.CONSTRAINT))
+    @JoinColumn(
+            name = "post_id",
+            nullable = false,
+            foreignKey = @ForeignKey(ConstraintMode.CONSTRAINT)
+    )
+    private Post post;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(
+            name = "author_id",
+            nullable = false,
+            foreignKey = @ForeignKey(ConstraintMode.CONSTRAINT)
+    )
     private User author;
 
-    @Column(length = 120, nullable = false)
-    private String title;
-
     @Column(name = "body", columnDefinition = "TEXT", nullable = false)
-    private String content;
+    private String body;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "status", nullable = false)
     private ContentStatus status = ContentStatus.ACTIVE;
 
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -54,7 +63,5 @@ public class Post {
         this.updatedAt = Instant.now();
     }
 
-    public boolean isDeleted() {
-        return deletedAt != null;
-    }
+    public boolean isDeleted() { return deletedAt != null; }
 }
