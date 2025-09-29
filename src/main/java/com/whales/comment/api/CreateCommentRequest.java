@@ -8,4 +8,9 @@ public record CreateCommentRequest(
         @Size(max = 5000, message = "댓글은 최대 5000자까지 입력할 수 있습니다.")
         String body
 ) {
+        public CreateCommentRequest {
+                if (body != null) {
+                        body = body.trim();
+                }
+        }
 }

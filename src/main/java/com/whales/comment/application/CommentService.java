@@ -57,7 +57,7 @@ public class CommentService {
         Comment comment = new Comment();
         comment.setPost(post);
         comment.setAuthor(user);
-        comment.setBody(request.body().trim());
+        comment.setBody(request.body());
         comment.setStatus(ContentStatus.ACTIVE);
 
         Comment saved = commentRepository.save(comment);
@@ -74,7 +74,7 @@ public class CommentService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only author can edit this comment");
         }
 
-        comment.setBody(request.body().trim());
+        comment.setBody(request.body());
         Comment saved = commentRepository.save(comment);
         return CommentResponse.from(saved);
     }
