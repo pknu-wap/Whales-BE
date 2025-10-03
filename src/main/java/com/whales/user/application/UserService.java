@@ -24,7 +24,7 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-        return toMeResponse(user);
+        return MeResponse.from(user);
     }
 
     @Transactional
@@ -44,17 +44,6 @@ public class UserService {
 
         User savedUser = userRepository.save(user);
 
-        return toMeResponse(savedUser);
-    }
-
-    private MeResponse toMeResponse(User u) {
-        return new MeResponse(
-                u.getId(),
-                u.getEmail(),
-                u.getDisplayName(),
-                u.getNicknameColor(),
-                u.getStatus().name(),
-                u.getAvatarUrl()
-        );
+        return MeResponse.from(savedUser);
     }
 }
