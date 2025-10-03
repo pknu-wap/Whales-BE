@@ -47,7 +47,7 @@ public class TagController {
     public ResponseEntity<Void> removeOneTag(@PathVariable UUID postId,
                                           @PathVariable UUID tagId,
                                           @AuthenticationPrincipal WhalesUserPrincipal principal) {
-        tagService.removeOneTag(postId, tagId, principal.getId());
+        tagService.removeOneTag(postId, principal.getId(), tagId);
         return ResponseEntity.noContent().build();
     }
 
