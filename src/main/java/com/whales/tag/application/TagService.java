@@ -1,5 +1,6 @@
 package com.whales.tag.application;
 
+import com.whales.post.api.PostResponse;
 import com.whales.post.domain.Post;
 import com.whales.post.domain.PostRepository;
 import com.whales.tag.api.TagListRequest;
@@ -97,6 +98,26 @@ public class TagService {
         // 모두 제거 후 새로 생성/연결
         postTagRepository.deleteAllByPostId(postId);
         return addTags(postId, authorId, request);
+    }
+
+    // 태그로 게시글 검색
+    public List<PostResponse> getPostsByTags(List<String> tagNames) {
+        if (tagNames == null || tagNames.isEmpty()) {
+            return List.of();
+        }
+
+        // 소문자 trim 처리
+        List<String> normalized = tagNames.stream()
+                .filter(Objects::nonNull)
+                .map(String::trim)
+                .filter(s -> !s.isBlank())
+                .map(String::toLowerCase)
+                .toList();
+
+        List<Post> posts = postRepository.findPostsByAllTagNames(normalized, normalized.size());
+        return posts.stream()
+                .map(PostResponse::from)
+                .toList();
     }
 
     // ---------- helpers ----------
