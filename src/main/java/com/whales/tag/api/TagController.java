@@ -1,5 +1,6 @@
 package com.whales.tag.api;
 
+import com.whales.post.api.PostResponse;
 import com.whales.security.WhalesUserPrincipal;
 import com.whales.tag.application.TagService;
 import jakarta.validation.Valid;
@@ -56,6 +57,13 @@ public class TagController {
                                                          @AuthenticationPrincipal WhalesUserPrincipal principal,
                                                          @Valid @RequestBody TagListRequest request) {
         return ResponseEntity.ok(tagService.replaceAllTags(postId, principal.getId(), request));
+    }
+
+    // 태그로 게시글 검색
+    @GetMapping("/tags/search")
+    public ResponseEntity<List<PostResponse>> searchPostsByTags(@RequestParam("names") List<String> names) {
+        List<PostResponse> posts = tagService.getPostsByTags(names);
+        return ResponseEntity.ok(posts);
     }
 
 }
