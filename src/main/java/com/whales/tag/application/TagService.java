@@ -11,6 +11,7 @@ import com.whales.tag.domain.PostTagRepository;
 import com.whales.tag.domain.Tag;
 import com.whales.tag.domain.TagRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -121,12 +122,12 @@ public class TagService {
     }
 
     // 태그 자동완성
-    public List<TagResponse> autoComplete(String keyword) {
+    public List<TagResponse> autoComplete(String keyword, int limit) {
         if (!StringUtils.hasText(keyword)) {
             return List.of(); // 빈 요청이면 빈 리스트
         }
 
-        return tagRepository.findByNameStartingWithIgnoreCase(keyword)
+        return tagRepository.findPopularTagsByPrefix(keyword, PageRequest.of(0, limit))
                 .stream()
                 .map(t -> new TagResponse(t.getId(), t.getName()))
                 .collect(Collectors.toList());

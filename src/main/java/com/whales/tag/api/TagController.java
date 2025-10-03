@@ -60,17 +60,17 @@ public class TagController {
     }
 
     // 태그로 게시글 검색
-    @GetMapping("/tags/search")
+    @GetMapping("/posts/by-tags")
     public ResponseEntity<List<PostResponse>> searchPostsByTags(@RequestParam("names") List<String> names) {
         List<PostResponse> posts = tagService.getPostsByTags(names);
         return ResponseEntity.ok(posts);
     }
 
     // 태그 자동완성
-    @GetMapping("/tags/search")
-    public ResponseEntity<List<TagResponse>> searchTags(@RequestParam("keyword") String keyword) {
-        List<TagResponse> result = tagService.autoComplete(keyword);
-        return ResponseEntity.ok(result);
+    @GetMapping("/tags/autocomplete")
+    public ResponseEntity<List<TagResponse>> searchTags(@RequestParam("keyword") String keyword,
+                                                        @RequestParam(defaultValue = "5") int limit) {
+        return ResponseEntity.ok(tagService.autoComplete(keyword, limit));
     }
 
 }
