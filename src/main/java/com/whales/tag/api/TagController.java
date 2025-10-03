@@ -66,4 +66,11 @@ public class TagController {
         return ResponseEntity.ok(posts);
     }
 
+    // 태그 자동완성
+    @GetMapping("/tags/search")
+    public ResponseEntity<List<TagResponse>> searchTags(@RequestParam("keyword") String keyword) {
+        List<TagResponse> result = tagService.autoComplete(keyword);
+        return ResponseEntity.ok(result);
+    }
+
 }

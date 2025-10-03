@@ -120,6 +120,18 @@ public class TagService {
                 .toList();
     }
 
+    // 태그 자동완성
+    public List<TagResponse> autoComplete(String keyword) {
+        if (!StringUtils.hasText(keyword)) {
+            return List.of(); // 빈 요청이면 빈 리스트
+        }
+
+        return tagRepository.findByNameStartingWithIgnoreCase(keyword)
+                .stream()
+                .map(t -> new TagResponse(t.getId(), t.getName()))
+                .collect(Collectors.toList());
+    }
+
     // ---------- helpers ----------
 
     private Post loadPostWithAuth(UUID postId, UUID authorId) {
