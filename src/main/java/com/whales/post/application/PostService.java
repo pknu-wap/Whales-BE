@@ -29,7 +29,7 @@ public class PostService {
     public List<PostResponse> getAllPosts() {
         return postRepository.findAll()
                 .stream()
-                .map(this::toPostResponse)
+                .map(PostResponse::from)
                 .collect(Collectors.toList());
     }
 
@@ -38,7 +38,7 @@ public class PostService {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Post not found with id: " + id));
-        return toPostResponse(post);
+        return PostResponse.from(post);
     }
 
     /**
@@ -60,7 +60,7 @@ public class PostService {
         newPost.setAuthor(author);
 
         Post saved = postRepository.save(newPost);
-        return toPostResponse(saved);
+        return PostResponse.from(saved);
     }
 
     /**
@@ -76,7 +76,7 @@ public class PostService {
         if (request.content() != null) post.setContent(request.content());
 
         Post saved = postRepository.save(post);
-        return toPostResponse(saved);
+        return PostResponse.from(saved);
     }
 
     // 삭제
@@ -86,16 +86,5 @@ public class PostService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found with id: " + id);
         }
         postRepository.deleteById(id);
-    }
-
-    private PostResponse toPostResponse(Post post) {
-        return new PostResponse(
-                post.getId(),
-                post.getTitle(),
-                post.getContent(),
-                post.getAuthor().getDisplayName(),
-                post.getCreatedAt(),
-                post.getUpdatedAt()
-        );
     }
 }
