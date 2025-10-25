@@ -48,16 +48,18 @@ public class PostController {
     @PatchMapping("/{postId}")
     public ResponseEntity<PostResponse> updatePost(
             @PathVariable UUID postId,
+            @AuthenticationPrincipal WhalesUserPrincipal principal,
             @RequestBody UpdatePostRequest request
     ) {
-        PostResponse updated = postService.updatePost(postId, request);
+        PostResponse updated = postService.updatePost(postId, principal.getId(), request);
         return ResponseEntity.ok(updated);
     }
 
     // 게시물 삭제
     @DeleteMapping("/{postId}")
-    public ResponseEntity<Void> deletePost(@PathVariable UUID postId) {
-        postService.deletePost(postId);
+    public ResponseEntity<Void> deletePost(@PathVariable UUID postId,
+                                           @AuthenticationPrincipal WhalesUserPrincipal principal) {
+        postService.deletePost(postId, principal.getId());
         return ResponseEntity.noContent().build();
     }
 }

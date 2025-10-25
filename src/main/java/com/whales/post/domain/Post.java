@@ -1,12 +1,15 @@
 package com.whales.post.domain;
 
 import com.whales.common.ContentStatus;
+import com.whales.tag.domain.PostTag;
 import com.whales.user.domain.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -29,6 +32,9 @@ public class Post {
 
     @Column(name = "body", columnDefinition = "TEXT", nullable = false)
     private String content;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<PostTag> postTags = new HashSet<>();
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
