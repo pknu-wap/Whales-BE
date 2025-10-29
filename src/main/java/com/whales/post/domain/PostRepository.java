@@ -25,4 +25,14 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
         HAVING COUNT(DISTINCT t.id) = :tagCount
         """)
     List<Post> findPostsByAllTagNames(@Param("names") List<String> names, @Param("tagCount") Integer tagCount);
+
+    // LazyLoading(n+1 문제) 방지
+    @Query("""
+        SELECT DISTINCT p FROM Post p
+        LEFT JOIN FETCH p.postTags pt
+        LEFT JOIN FETCH pt.tag
+        LEFT JOIN FETCH p.author
+        WHERE p.id = :id
+        """)
+    Optional<Post> findByIdWithTagsAndAuthor(@Param("id") UUID id);
 }

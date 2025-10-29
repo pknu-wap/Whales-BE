@@ -60,7 +60,7 @@ public class PostService {
         }
 
         // 태그 반영된 최신 엔티티 다시 조회
-        Post refreshed = postRepository.findById(saved.getId())
+        Post refreshed = postRepository.findByIdWithTagsAndAuthor(saved.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         return PostResponse.from(refreshed);
     }
@@ -81,7 +81,7 @@ public class PostService {
             tagService.replaceAllTags(saved.getId(), authorId, new TagListRequest(request.tags()));
         }
 
-        Post refreshed = postRepository.findById(saved.getId())
+        Post refreshed = postRepository.findByIdWithTagsAndAuthor(saved.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         return PostResponse.from(refreshed);
     }
@@ -95,7 +95,7 @@ public class PostService {
 
     // ---------- helpers ----------
     private Post loadPostWithAuth(UUID postId, UUID authorId) {
-        Post post = postRepository.findById(postId)
+        Post post = postRepository.findByIdWithTagsAndAuthor(postId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
 
         if (post.getAuthor() == null || !post.getAuthor().getId().equals(authorId)) {
@@ -105,7 +105,7 @@ public class PostService {
     }
 
     private Post loadPost(UUID postId) {
-        return postRepository.findById(postId)
+        return postRepository.findByIdWithTagsAndAuthor(postId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
     }
 
