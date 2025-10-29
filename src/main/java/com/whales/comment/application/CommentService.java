@@ -39,9 +39,7 @@ public class CommentService {
     }
 
     public CommentResponse getById(UUID commentId) {
-        Comment comment = loadComment(commentId);
-
-        return CommentResponse.from(comment);
+        return CommentResponse.from(loadComment(commentId));
     }
 
     @Transactional
