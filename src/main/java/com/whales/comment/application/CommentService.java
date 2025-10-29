@@ -67,9 +67,7 @@ public class CommentService {
 
         Comment comment = loadComment(commentId);
 
-        if (!comment.getAuthor().getId().equals(authorId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only author can edit this comment");
-        }
+        ensureAuthor(comment, authorId);
 
         comment.setBody(request.body());
         Comment saved = commentRepository.save(comment);
@@ -81,9 +79,7 @@ public class CommentService {
 
         Comment comment = loadComment(commentId);
 
-        if (!comment.getAuthor().getId().equals(requesterId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only author can delete this comment");
-        }
+        ensureAuthor(comment, requesterId);
 
         if (softDelete) {
             comment.setDeletedAt(Instant.now());
@@ -109,5 +105,11 @@ public class CommentService {
     private User loadUser(UUID userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+    }
+
+    private void ensureAuthor(Comment comment, UUID authorId) {
+        if (!comment.getAuthor().getId().equals(authorId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only author can modify this comment");
+        }
     }
 }
