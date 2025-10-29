@@ -38,10 +38,7 @@ public class PostService {
 
     // 상세 조회
     public PostResponse getPostById(UUID id) {
-        Post post = postRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Post not found with id: " + id));
-        return PostResponse.from(post);
+        return PostResponse.from(loadPost(id));
     }
 
     /**
@@ -49,9 +46,7 @@ public class PostService {
      */
     @Transactional
     public PostResponse createPost(UUID authorId, CreatePostRequest request) {
-        User author = userRepository.findById(authorId)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Author not found with id: " + authorId));
+        User author = loadAuthor(authorId);
 
         Post newPost = new Post();
         newPost.setTitle(request.title());
@@ -98,6 +93,7 @@ public class PostService {
         postRepository.delete(post);
     }
 
+    // ---------- helpers ----------
     private Post loadPostWithAuth(UUID postId, UUID authorId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
@@ -106,5 +102,15 @@ public class PostService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only author can manage posts");
         }
         return post;
+    }
+
+    private Post loadPost(UUID postId) {
+        return postRepository.findById(postId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
+    }
+
+    private User loadAuthor(UUID authorId) {
+        return userRepository.findById(authorId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Author not found"));
     }
 }
