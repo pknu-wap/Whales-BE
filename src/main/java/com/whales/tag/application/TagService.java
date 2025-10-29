@@ -117,7 +117,8 @@ public class TagService {
             return List.of(); // 빈 요청이면 빈 리스트
         }
 
-        return tagRepository.findPopularTagsByPrefix(keyword, PageRequest.of(0, limit))
+        String prefix = keyword.trim().toLowerCase();
+        return tagRepository.findPopularTagsByPrefix(prefix, PageRequest.of(0, limit))
                 .stream()
                 .map(t -> new TagResponse(t.getId(), t.getName()))
                 .collect(Collectors.toList());
