@@ -67,7 +67,7 @@ public class PostService {
         // 태그 반영된 최신 엔티티 다시 조회
         Post refreshed = postRepository.findById(saved.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        return PostResponse.from(saved);
+        return PostResponse.from(refreshed);
     }
 
     /**
@@ -88,7 +88,7 @@ public class PostService {
 
         Post refreshed = postRepository.findById(saved.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        return PostResponse.from(saved);
+        return PostResponse.from(refreshed);
     }
 
     // 삭제
