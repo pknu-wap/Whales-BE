@@ -48,12 +48,7 @@ public class TagService {
 
         List<TagResponse> result = new ArrayList<>();
         for (String name : names) {
-            Tag tag = tagRepository.findByNameIgnoreCase(name)
-                    .orElseGet(() -> {
-                        Tag t = new Tag();
-                        t.setName(name);
-                        return tagRepository.save(t);
-                    });
+            Tag tag = ensureTagExists(name);
 
             if (!postTagRepository.existsByPostIdAndTagId(postId, tag.getId())) {
                 PostTag link = new PostTag(post, tag);
@@ -70,12 +65,7 @@ public class TagService {
         Post post = loadPostWithAuth(postId, authorId);
         String normalized = normalizeOne(request.name());
 
-        Tag tag = tagRepository.findByNameIgnoreCase(normalized)
-                .orElseGet(() -> {
-                    Tag t = new Tag();
-                    t.setName(normalized);
-                    return tagRepository.save(t);
-                });
+        Tag tag = ensureTagExists(normalized);
 
         if (!postTagRepository.existsByPostIdAndTagId(postId, tag.getId())) {
             PostTag link = new PostTag(post, tag);
@@ -159,5 +149,14 @@ public class TagService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tag name required");
         }
         return name.trim().toLowerCase();
+    }
+
+    private Tag ensureTagExists(String name) {
+        return tagRepository.findByNameIgnoreCase(name)
+                .orElseGet(() -> {
+                    Tag t = new Tag();
+                    t.setName(name);
+                    return tagRepository.save(t);
+                });
     }
 }
