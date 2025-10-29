@@ -30,7 +30,6 @@ public class CommentService {
     private final UserRepository userRepository;
 
     public List<CommentResponse> listByPost (UUID postId) {
-
         List<Comment> commentList = commentRepository
                 .findByPost_IdAndDeletedAtIsNullAndStatusOrderByCreatedAtDesc(postId, ContentStatus.ACTIVE);
 
@@ -40,23 +39,17 @@ public class CommentService {
     }
 
     public CommentResponse getById(UUID commentId) {
-        Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment not found"));
+        Comment comment = loadComment(commentId);
 
         return CommentResponse.from(comment);
     }
 
     @Transactional
     public CommentResponse createComment(UUID postId, UUID authorId, CreateCommentRequest request) {
-
         Post post = loadPost(postId);
         User user = loadUser(authorId);
 
-        Comment comment = new Comment();
-        comment.setPost(post);
-        comment.setAuthor(user);
-        comment.setBody(request.body());
-        comment.setStatus(ContentStatus.ACTIVE);
+        Comment comment = new Comment(post, user, request.body()) ;
 
         Comment saved = commentRepository.save(comment);
         return CommentResponse.from(saved);
@@ -64,7 +57,6 @@ public class CommentService {
 
     @Transactional
     public CommentResponse updateComment(UUID commentId, UUID authorId, UpdateCommentRequest request) {
-
         Comment comment = loadComment(commentId);
 
         ensureAuthor(comment, authorId);
@@ -76,7 +68,6 @@ public class CommentService {
 
     @Transactional
     public void deleteComment(UUID commentId, UUID requesterId, boolean softDelete) {
-
         Comment comment = loadComment(commentId);
 
         ensureAuthor(comment, requesterId);
