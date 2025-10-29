@@ -49,10 +49,8 @@ public class CommentService {
     @Transactional
     public CommentResponse createComment(UUID postId, UUID authorId, CreateCommentRequest request) {
 
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
-        User user = userRepository.findById(authorId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        Post post = loadPost(postId);
+        User user = loadUser(authorId);
 
         Comment comment = new Comment();
         comment.setPost(post);
@@ -67,8 +65,7 @@ public class CommentService {
     @Transactional
     public CommentResponse updateComment(UUID commentId, UUID authorId, UpdateCommentRequest request) {
 
-        Comment comment = commentRepository.findByIdAndDeletedAtIsNull(commentId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment not found"));
+        Comment comment = loadComment(commentId);
 
         if (!comment.getAuthor().getId().equals(authorId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only author can edit this comment");
@@ -81,8 +78,8 @@ public class CommentService {
 
     @Transactional
     public void deleteComment(UUID commentId, UUID requesterId, boolean softDelete) {
-        Comment comment = commentRepository.findByIdAndDeletedAtIsNull(commentId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment not found"));
+
+        Comment comment = loadComment(commentId);
 
         if (!comment.getAuthor().getId().equals(requesterId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only author can delete this comment");
@@ -95,5 +92,22 @@ public class CommentService {
         } else {
             commentRepository.delete(comment);
         }
+    }
+
+
+    // ---------- helpers ----------
+    private Comment loadComment(UUID commentId) {
+        return commentRepository.findByIdAndDeletedAtIsNull(commentId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment not found"));
+    }
+
+    private Post loadPost(UUID postId) {
+        return postRepository.findById(postId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
+    }
+
+    private User loadUser(UUID userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
     }
 }
