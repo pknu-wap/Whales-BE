@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.Instant;
+import java.util.Objects;
 import java.util.UUID;
 
 @Entity
@@ -51,6 +52,18 @@ public class Comment {
 
     @Column(name = "deleted_at")
     private Instant deletedAt;
+
+    protected Comment() {} // JPA용
+
+    public Comment(Post post, User author, String body) {
+        if (body == null || body.isBlank()) {
+            throw new IllegalArgumentException("Comment body cannot be blank");
+        }
+        this.post = Objects.requireNonNull(post);
+        this.author = Objects.requireNonNull(author);
+        this.body = body.trim();
+        this.status = ContentStatus.ACTIVE;
+    }
 
     @PrePersist
     void onCreate() {

@@ -30,7 +30,6 @@ public class CommentService {
     private final UserRepository userRepository;
 
     public List<CommentResponse> listByPost (UUID postId) {
-
         List<Comment> commentList = commentRepository
                 .findByPost_IdAndDeletedAtIsNullAndStatusOrderByCreatedAtDesc(postId, ContentStatus.ACTIVE);
 
@@ -40,25 +39,15 @@ public class CommentService {
     }
 
     public CommentResponse getById(UUID commentId) {
-        Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment not found"));
-
-        return CommentResponse.from(comment);
+        return CommentResponse.from(loadComment(commentId));
     }
 
     @Transactional
     public CommentResponse createComment(UUID postId, UUID authorId, CreateCommentRequest request) {
+        Post post = loadPost(postId);
+        User user = loadUser(authorId);
 
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
-        User user = userRepository.findById(authorId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-
-        Comment comment = new Comment();
-        comment.setPost(post);
-        comment.setAuthor(user);
-        comment.setBody(request.body());
-        comment.setStatus(ContentStatus.ACTIVE);
+        Comment comment = new Comment(post, user, request.body()) ;
 
         Comment saved = commentRepository.save(comment);
         return CommentResponse.from(saved);
@@ -66,13 +55,9 @@ public class CommentService {
 
     @Transactional
     public CommentResponse updateComment(UUID commentId, UUID authorId, UpdateCommentRequest request) {
+        Comment comment = loadComment(commentId);
 
-        Comment comment = commentRepository.findByIdAndDeletedAtIsNull(commentId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment not found"));
-
-        if (!comment.getAuthor().getId().equals(authorId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only author can edit this comment");
-        }
+        ensureAuthor(comment, authorId);
 
         comment.setBody(request.body());
         Comment saved = commentRepository.save(comment);
@@ -81,12 +66,9 @@ public class CommentService {
 
     @Transactional
     public void deleteComment(UUID commentId, UUID requesterId, boolean softDelete) {
-        Comment comment = commentRepository.findByIdAndDeletedAtIsNull(commentId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment not found"));
+        Comment comment = loadComment(commentId);
 
-        if (!comment.getAuthor().getId().equals(requesterId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only author can delete this comment");
-        }
+        ensureAuthor(comment, requesterId);
 
         if (softDelete) {
             comment.setDeletedAt(Instant.now());
@@ -94,6 +76,29 @@ public class CommentService {
             commentRepository.save(comment);
         } else {
             commentRepository.delete(comment);
+        }
+    }
+
+
+    // ---------- helpers ----------
+    private Comment loadComment(UUID commentId) {
+        return commentRepository.findByIdAndDeletedAtIsNull(commentId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment not found"));
+    }
+
+    private Post loadPost(UUID postId) {
+        return postRepository.findById(postId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
+    }
+
+    private User loadUser(UUID userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+    }
+
+    private void ensureAuthor(Comment comment, UUID authorId) {
+        if (!comment.getAuthor().getId().equals(authorId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only author can modify this comment");
         }
     }
 }

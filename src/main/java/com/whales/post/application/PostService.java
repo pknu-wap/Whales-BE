@@ -38,10 +38,7 @@ public class PostService {
 
     // 상세 조회
     public PostResponse getPostById(UUID id) {
-        Post post = postRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Post not found with id: " + id));
-        return PostResponse.from(post);
+        return PostResponse.from(loadPost(id));
     }
 
     /**
@@ -49,9 +46,7 @@ public class PostService {
      */
     @Transactional
     public PostResponse createPost(UUID authorId, CreatePostRequest request) {
-        User author = userRepository.findById(authorId)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Author not found with id: " + authorId));
+        User author = loadAuthor(authorId);
 
         Post newPost = new Post();
         newPost.setTitle(request.title());
@@ -65,9 +60,9 @@ public class PostService {
         }
 
         // 태그 반영된 최신 엔티티 다시 조회
-        Post refreshed = postRepository.findById(saved.getId())
+        Post refreshed = postRepository.findByIdWithTagsAndAuthor(saved.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        return PostResponse.from(saved);
+        return PostResponse.from(refreshed);
     }
 
     /**
@@ -86,9 +81,9 @@ public class PostService {
             tagService.replaceAllTags(saved.getId(), authorId, new TagListRequest(request.tags()));
         }
 
-        Post refreshed = postRepository.findById(saved.getId())
+        Post refreshed = postRepository.findByIdWithTagsAndAuthor(saved.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        return PostResponse.from(saved);
+        return PostResponse.from(refreshed);
     }
 
     // 삭제
@@ -98,13 +93,24 @@ public class PostService {
         postRepository.delete(post);
     }
 
+    // ---------- helpers ----------
     private Post loadPostWithAuth(UUID postId, UUID authorId) {
-        Post post = postRepository.findById(postId)
+        Post post = postRepository.findByIdWithTagsAndAuthor(postId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
 
         if (post.getAuthor() == null || !post.getAuthor().getId().equals(authorId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only author can manage posts");
         }
         return post;
+    }
+
+    private Post loadPost(UUID postId) {
+        return postRepository.findByIdWithTagsAndAuthor(postId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
+    }
+
+    private User loadAuthor(UUID authorId) {
+        return userRepository.findById(authorId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Author not found"));
     }
 }
