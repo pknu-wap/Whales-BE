@@ -8,6 +8,8 @@ import com.whales.comment.domain.CommentRepository;
 import com.whales.common.ContentStatus;
 import com.whales.post.domain.Post;
 import com.whales.post.domain.PostRepository;
+import com.whales.reaction.api.ReactionSummary;
+import com.whales.reaction.application.CommentReactionService;
 import com.whales.user.domain.User;
 import com.whales.user.domain.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,46 +30,53 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final CommentReactionService commentReactionService;
 
-    public List<CommentResponse> listByPost (UUID postId) {
+    public List<CommentResponse> listByPost (UUID postId, UUID userId) {
         List<Comment> commentList = commentRepository
                 .findByPost_IdAndDeletedAtIsNullAndStatusOrderByCreatedAtDesc(postId, ContentStatus.ACTIVE);
 
         return commentList.stream()
-                .map(CommentResponse::from)
+                .map(comment -> {
+                    ReactionSummary reactions = commentReactionService.getReactionSummary(comment.getId(), userId);
+                    return CommentResponse.from(comment, reactions);
+                })
                 .collect(Collectors.toList());
     }
 
-    public CommentResponse getById(UUID commentId) {
-        return CommentResponse.from(loadComment(commentId));
+    public CommentResponse getById(UUID commentId, UUID userId) {
+        Comment comment = loadComment(commentId);
+        ReactionSummary reactions = commentReactionService.getReactionSummary(commentId, userId);
+        return CommentResponse.from(comment, reactions);
     }
 
     @Transactional
     public CommentResponse createComment(UUID postId, UUID authorId, CreateCommentRequest request) {
         Post post = loadPost(postId);
-        User user = loadUser(authorId);
+        User author = loadUser(authorId);
 
-        Comment comment = new Comment(post, user, request.body()) ;
-
+        Comment comment = new Comment(post, author, request.body()) ;
         Comment saved = commentRepository.save(comment);
-        return CommentResponse.from(saved);
+
+        ReactionSummary emptyReactions = new ReactionSummary(0, 0, null);
+        return CommentResponse.from(saved, emptyReactions);
     }
 
     @Transactional
     public CommentResponse updateComment(UUID commentId, UUID authorId, UpdateCommentRequest request) {
         Comment comment = loadComment(commentId);
-
         ensureAuthor(comment, authorId);
 
         comment.setBody(request.body());
-        Comment saved = commentRepository.save(comment);
-        return CommentResponse.from(saved);
+        Comment updated = commentRepository.save(comment);
+
+        ReactionSummary reactions = commentReactionService.getReactionSummary(commentId, authorId);
+        return CommentResponse.from(updated, reactions);
     }
 
     @Transactional
     public void deleteComment(UUID commentId, UUID requesterId, boolean softDelete) {
         Comment comment = loadComment(commentId);
-
         ensureAuthor(comment, requesterId);
 
         if (softDelete) {
