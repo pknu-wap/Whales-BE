@@ -6,7 +6,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface PostReactionRepository extends JpaRepository<PostReaction, PostReaction.Id> {
-    Optional<PostReaction> findByUserIdAndPostId(UUID userId, UUID postId);
-    long countByPostIdAndType(UUID postId, ReactionType type);
-    void deleteByUserIdAndPostId(UUID userId, UUID postId);
+    Optional<PostReaction> findByUser_IdAndPost_Id(UUID userId, UUID postId);
+    long countByPost_IdAndType(UUID postId, ReactionType type);
 }

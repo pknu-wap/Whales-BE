@@ -6,7 +6,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface CommentReactionRepository extends JpaRepository<CommentReaction, CommentReaction.Id> {
-    Optional<CommentReaction> findByUserIdAndCommentId(UUID userId, UUID commentId);
-    long countByCommentIdAndType(UUID commentId, ReactionType type);
-    void deleteByUserIdAndCommentId(UUID userId, UUID commentId);
+    Optional<CommentReaction> findByUser_IdAndComment_Id(UUID userId, UUID commentId);
+    long countByComment_IdAndType(UUID commentId, ReactionType type);
 }
