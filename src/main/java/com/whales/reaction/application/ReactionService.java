@@ -12,17 +12,10 @@ public abstract class ReactionService<T extends Reaction> {
     protected abstract Optional<T> findReactionByUserAndTargetId(UUID userId, UUID targetId);
     protected abstract void saveReaction(T reaction);
     protected abstract void deleteReaction(T reaction);
-    protected abstract long countReactionsByTargetIdAndType(UUID targetId, ReactionType type);
+    protected abstract ReactionSummary aggregateReactionSummary(UUID targetId, UUID userId);
 
     public ReactionSummary getReactionSummary(UUID targetId, UUID userId) {
-        long likeCount = countReactionsByTargetIdAndType(targetId, ReactionType.LIKE);
-        long dislikeCount = countReactionsByTargetIdAndType(targetId, ReactionType.DISLIKE);
-
-        ReactionType myReaction = findReactionByUserAndTargetId(userId, targetId)
-                .map(Reaction::getType)
-                .orElse(null);
-
-        return new ReactionSummary(likeCount, dislikeCount, myReaction);
+        return aggregateReactionSummary(targetId, userId);
     }
 
     protected void toggleReaction(Optional<T> existing, T newReaction, ReactionType type) {
@@ -34,5 +27,4 @@ public abstract class ReactionService<T extends Reaction> {
             }
         }, () -> saveReaction(newReaction));
     }
-
 }

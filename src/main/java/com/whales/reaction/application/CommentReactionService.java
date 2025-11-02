@@ -37,7 +37,7 @@ public class CommentReactionService extends ReactionService<CommentReaction> {
 
     @Transactional(readOnly = true)
     public ReactionSummary getReactionSummary(UUID commentId, UUID userId) {
-        return super.getReactionSummary(commentId, userId);
+        return aggregateReactionSummary(commentId, userId);
     }
 
     @Override
@@ -56,7 +56,13 @@ public class CommentReactionService extends ReactionService<CommentReaction> {
     }
 
     @Override
-    protected long countReactionsByTargetIdAndType(UUID commentId, ReactionType type) {
-        return commentReactionRepository.countByComment_IdAndType(commentId, type);
+    protected ReactionSummary aggregateReactionSummary(UUID commentId, UUID userId) {
+        Object[] result = commentReactionRepository.getReactionSummary(commentId, userId);
+
+        long likeCount = result[0] != null ? ((Number) result[0]).longValue() : 0L;
+        long dislikeCount = result[1] != null ? ((Number) result[1]).longValue() : 0L;
+        ReactionType reactionType = result[2] != null ? ReactionType.valueOf(result[2].toString()) : null;
+
+        return new ReactionSummary(likeCount, dislikeCount, reactionType);
     }
 }
