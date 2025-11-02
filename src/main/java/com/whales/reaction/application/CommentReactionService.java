@@ -2,6 +2,7 @@ package com.whales.reaction.application;
 
 import com.whales.comment.domain.Comment;
 import com.whales.comment.domain.CommentRepository;
+import com.whales.reaction.api.ReactionSummary;
 import com.whales.reaction.domain.CommentReaction;
 import com.whales.reaction.domain.CommentReactionRepository;
 import com.whales.reaction.domain.ReactionType;
@@ -30,13 +31,18 @@ public class CommentReactionService extends ReactionService<CommentReaction> {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment not found"));
-        Optional<CommentReaction> existing = commentReactionRepository.findByUserIdAndCommentId(userId, commentId);
+        Optional<CommentReaction> existing = commentReactionRepository.findByUser_IdAndComment_Id(userId, commentId);
         toggleReaction(existing , new CommentReaction(user, comment, type), type);
+    }
+
+    @Transactional(readOnly = true)
+    public ReactionSummary getReactionSummary(UUID commentId, UUID userId) {
+        return super.getReactionSummary(commentId, userId);
     }
 
     @Override
     protected Optional<CommentReaction> findReactionByUserAndTargetId(UUID userId, UUID commentId) {
-        return commentReactionRepository.findByUserIdAndCommentId(userId, commentId);
+        return commentReactionRepository.findByUser_IdAndComment_Id(userId, commentId);
     }
 
     @Override
@@ -47,5 +53,10 @@ public class CommentReactionService extends ReactionService<CommentReaction> {
     @Override
     protected void deleteReaction(CommentReaction reaction) {
         commentReactionRepository.delete(reaction);
+    }
+
+    @Override
+    protected long countReactionsByTargetIdAndType(UUID commentId, ReactionType type) {
+        return commentReactionRepository.countByComment_IdAndType(commentId, type);
     }
 }

@@ -2,6 +2,7 @@ package com.whales.reaction.application;
 
 import com.whales.post.domain.Post;
 import com.whales.post.domain.PostRepository;
+import com.whales.reaction.api.ReactionSummary;
 import com.whales.reaction.domain.PostReaction;
 import com.whales.reaction.domain.PostReactionRepository;
 import com.whales.reaction.domain.ReactionType;
@@ -31,13 +32,18 @@ public class PostReactionService extends ReactionService<PostReaction> {
 
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
-        Optional<PostReaction> existing = postReactionRepository.findByUserIdAndPostId(userId, postId);
+        Optional<PostReaction> existing = postReactionRepository.findByUser_IdAndPost_Id(userId, postId);
         toggleReaction(existing, new PostReaction(user, post, type), type);
+    }
+
+    @Transactional(readOnly = true)
+    public ReactionSummary getReactionSummary(UUID postId, UUID userId) {
+        return super.getReactionSummary(postId, userId);
     }
 
     @Override
     protected Optional<PostReaction> findReactionByUserAndTargetId(UUID userId, UUID postId) {
-        return postReactionRepository.findByUserIdAndPostId(userId, postId);
+        return postReactionRepository.findByUser_IdAndPost_Id(userId, postId);
     }
 
     @Override
@@ -48,6 +54,11 @@ public class PostReactionService extends ReactionService<PostReaction> {
     @Override
     protected void deleteReaction(PostReaction reaction) {
         postReactionRepository.delete(reaction);
+    }
+
+    @Override
+    protected long countReactionsByTargetIdAndType(UUID postId, ReactionType type) {
+        return postReactionRepository.countByPost_IdAndType(postId, type);
     }
 
 }
