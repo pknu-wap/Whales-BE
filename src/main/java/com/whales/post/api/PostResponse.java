@@ -1,6 +1,7 @@
 package com.whales.post.api;
 
 import com.whales.post.domain.Post;
+import com.whales.reaction.api.ReactionSummary;
 import com.whales.tag.api.TagResponse;
 
 import java.time.Instant;
@@ -16,8 +17,24 @@ public record PostResponse (
         List<TagResponse> tags,
         String authorName,
         Instant createdAt,
-        Instant updatedAt
+        Instant updatedAt,
+        ReactionSummary reactions
 ){
+    public static PostResponse from(Post post, ReactionSummary reactions) {
+        return new PostResponse(
+                post.getId(),
+                post.getTitle(),
+                post.getContent(),
+                post.getPostTags().stream()
+                        .map(pt -> new TagResponse(pt.getTag().getId(), pt.getTag().getName()))
+                        .collect(Collectors.toList()),
+                post.getAuthor().getDisplayName(),
+                post.getCreatedAt(),
+                post.getUpdatedAt(),
+                reactions
+        );
+    }
+
     public static PostResponse from(Post post) {
         return new PostResponse(
                 post.getId(),
@@ -28,7 +45,8 @@ public record PostResponse (
                         .collect(Collectors.toList()),
                 post.getAuthor().getDisplayName(),
                 post.getCreatedAt(),
-                post.getUpdatedAt()
+                post.getUpdatedAt(),
+                null
         );
     }
 }

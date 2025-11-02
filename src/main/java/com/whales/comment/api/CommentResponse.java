@@ -2,6 +2,7 @@ package com.whales.comment.api;
 
 import com.whales.comment.domain.Comment;
 import com.whales.common.ContentStatus;
+import com.whales.reaction.api.ReactionSummary;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -13,9 +14,10 @@ public record CommentResponse(
         String content,
         ContentStatus status,
         Instant createdAt,
-        Instant updatedAt
+        Instant updatedAt,
+        ReactionSummary reactions
 ) {
-    public static CommentResponse from(Comment comment) {
+    public static CommentResponse from(Comment comment, ReactionSummary reactions) {
         return new CommentResponse(
                 comment.getId(),
                 comment.getPost().getId(),
@@ -23,7 +25,8 @@ public record CommentResponse(
                 comment.getBody(),
                 comment.getStatus(),
                 comment.getCreatedAt(),
-                comment.getUpdatedAt()
+                comment.getUpdatedAt(),
+                reactions
         );
     }
 }
