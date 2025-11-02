@@ -6,10 +6,7 @@ import com.whales.security.WhalesUserPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
@@ -32,5 +29,12 @@ public class CommentReactionController {
                               @AuthenticationPrincipal WhalesUserPrincipal principal) {
         commentReactionService.toggle(commentId, principal.getId(), ReactionType.DISLIKE);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{commentId}/reactions")
+    public ResponseEntity<ReactionSummary> getCommentReactionSummary(@PathVariable UUID commentId,
+                                                     @AuthenticationPrincipal WhalesUserPrincipal principal) {
+        ReactionSummary reactions = commentReactionService.getReactionSummary(commentId, principal.getId());
+        return ResponseEntity.ok(reactions);
     }
 }
