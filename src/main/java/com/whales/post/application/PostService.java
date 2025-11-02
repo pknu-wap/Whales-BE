@@ -5,6 +5,8 @@ import com.whales.post.api.PostResponse;
 import com.whales.post.api.UpdatePostRequest;
 import com.whales.post.domain.Post;
 import com.whales.post.domain.PostRepository;
+import com.whales.reaction.api.ReactionSummary;
+import com.whales.reaction.application.PostReactionService;
 import com.whales.tag.api.TagListRequest;
 import com.whales.tag.application.TagService;
 import com.whales.user.domain.User;
@@ -27,6 +29,7 @@ public class PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final TagService tagService;
+    private final PostReactionService postReactionService;
 
     // 전체 조회
     public List<PostResponse> getAllPosts() {
@@ -37,8 +40,11 @@ public class PostService {
     }
 
     // 상세 조회
-    public PostResponse getPostById(UUID id) {
-        return PostResponse.from(loadPost(id));
+    public PostResponse getPostById(UUID postId, UUID userId) {
+        Post post = loadPost(postId);
+
+        ReactionSummary reactions = postReactionService.getReactionSummary(postId, userId);
+        return PostResponse.from(post, reactions);
     }
 
     /**

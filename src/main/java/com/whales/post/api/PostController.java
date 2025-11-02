@@ -26,8 +26,10 @@ public class PostController {
 
     // 게시물 상세 조회
     @GetMapping("/{postId}")
-    public ResponseEntity<PostResponse> getPostById(@PathVariable UUID postId) {
-        PostResponse post = postService.getPostById(postId);
+    public ResponseEntity<PostResponse> getPostById(@PathVariable UUID postId,
+                                                    @AuthenticationPrincipal WhalesUserPrincipal principal) {
+        UUID userId = (principal != null) ? principal.getId() : null;
+        PostResponse post = postService.getPostById(postId, userId);
         return ResponseEntity.ok(post);
     }
 

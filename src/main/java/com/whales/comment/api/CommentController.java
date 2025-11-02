@@ -18,14 +18,18 @@ public class CommentController {
     private final CommentService commentService;
 
     @GetMapping("/posts/{postId}/comments")
-    public ResponseEntity<List<CommentResponse>> listCommentByPost(@PathVariable("postId") UUID postId) {
-        List<CommentResponse> list = commentService.listByPost(postId);
+    public ResponseEntity<List<CommentResponse>> listCommentByPost(@PathVariable("postId") UUID postId,
+                                                                   @AuthenticationPrincipal WhalesUserPrincipal principal) {
+        UUID userId = (principal != null) ? principal.getId() : null;
+        List<CommentResponse> list = commentService.listByPost(postId, userId);
         return ResponseEntity.ok(list);
     }
 
     @GetMapping("/comments/{id}")
-    public ResponseEntity<CommentResponse> getCommentById(@PathVariable("id") UUID id) {
-        CommentResponse comment = commentService.getById(id);
+    public ResponseEntity<CommentResponse> getCommentById(@PathVariable("id") UUID id,
+                                                          @AuthenticationPrincipal WhalesUserPrincipal principal) {
+        UUID userId = (principal != null) ? principal.getId() : null;
+        CommentResponse comment = commentService.getById(id, userId);
         return ResponseEntity.ok(comment);
     }
 
