@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -17,4 +18,5 @@ public interface PostReactionRepository extends JpaRepository<PostReaction, Post
         FROM PostReaction r
         WHERE r.post.id = :postId
     """)
-    Object[] getReactionSummary(@Param("postId") UUID postId, @Param("userId") UUID userId);}
+    List<Object[]> getReactionSummary(@Param("postId") UUID postId, @Param("userId") UUID userId);
+}

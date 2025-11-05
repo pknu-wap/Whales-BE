@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -57,12 +58,16 @@ public class CommentReactionService extends ReactionService<CommentReaction> {
 
     @Override
     protected ReactionSummary aggregateReactionSummary(UUID commentId, UUID userId) {
-        Object[] result = commentReactionRepository.getReactionSummary(commentId, userId);
+        List<Object[]> results = commentReactionRepository.getReactionSummary(commentId, userId);
+        if (results == null || results.isEmpty()) {
+            return new ReactionSummary(0, 0, null);
+        }
 
-        long likeCount = result[0] != null ? ((Number) result[0]).longValue() : 0L;
-        long dislikeCount = result[1] != null ? ((Number) result[1]).longValue() : 0L;
-        ReactionType reactionType = result[2] != null ? ReactionType.valueOf(result[2].toString()) : null;
+        Object[] row = results.get(0);
+        long likeCount = row[0] instanceof Number ? ((Number) row[0]).longValue() : 0L;
+        long dislikeCount = row[1] instanceof Number ? ((Number) row[1]).longValue() : 0L;
+        ReactionType myReaction = row[2] != null ? ReactionType.valueOf(row[2].toString()) : null;
 
-        return new ReactionSummary(likeCount, dislikeCount, reactionType);
+        return new ReactionSummary(likeCount, dislikeCount, myReaction);
     }
 }
