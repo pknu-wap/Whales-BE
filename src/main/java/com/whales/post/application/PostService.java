@@ -99,6 +99,14 @@ public class PostService {
         postRepository.delete(post);
     }
 
+    @Transactional(readOnly = true)
+    public List<PostResponse> searchPosts(String query) {
+        List<Post> results = postRepository.searchByKeyword(query);
+        return results.stream()
+                .map(PostResponse::from)
+                .collect(Collectors.toList());
+    }
+
     // ---------- helpers ----------
     private Post loadPostWithAuth(UUID postId, UUID authorId) {
         Post post = postRepository.findByIdWithTagsAndAuthor(postId)

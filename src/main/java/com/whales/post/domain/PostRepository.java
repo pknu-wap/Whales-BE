@@ -35,4 +35,14 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
         WHERE p.id = :id
         """)
     Optional<Post> findByIdWithTagsAndAuthor(@Param("id") UUID id);
+
+    // 제목, 내용으로만 검색
+    @Query("""
+        SELECT p
+        FROM Post p
+        WHERE LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
+           OR LOWER(p.content) LIKE LOWER(CONCAT('%', :keyword, '%'))
+        ORDER BY p.createdAt DESC
+    """)
+    List<Post> searchByKeyword(@Param("keyword") String keyword);
 }

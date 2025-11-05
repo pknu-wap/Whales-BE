@@ -64,4 +64,10 @@ public class PostController {
         postService.deletePost(postId, principal.getId());
         return ResponseEntity.noContent().build();
     }
+
+    // 제목, 내용 검색 기능
+    @GetMapping("/search")
+    public List<PostResponse> searchPosts(@RequestParam("query") String query) {
+        return postService.searchPosts(query);
+    }
 }

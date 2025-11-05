@@ -50,6 +50,18 @@ public class CommentService {
         return CommentResponse.from(comment, reactions);
     }
 
+    public List<CommentResponse> listByUserId(UUID authorId) {
+        List<Comment> commentList = commentRepository
+                .findByAuthor_IdAndDeletedAtIsNullAndStatusOrderByCreatedAtDesc(authorId, ContentStatus.ACTIVE);
+
+        return commentList.stream()
+                .map(comment -> {
+                    ReactionSummary reactions = commentReactionService.getReactionSummary(comment.getId(), authorId);
+                    return CommentResponse.from(comment, reactions);
+                })
+                .collect(Collectors.toList());
+    }
+
     @Transactional
     public CommentResponse createComment(UUID postId, UUID authorId, CreateCommentRequest request) {
         Post post = loadPost(postId);
