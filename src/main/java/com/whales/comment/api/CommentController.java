@@ -33,6 +33,12 @@ public class CommentController {
         return ResponseEntity.ok(comment);
     }
 
+    @GetMapping("/comments/me")
+    public ResponseEntity<List<CommentResponse>> listCommentByUser(@AuthenticationPrincipal WhalesUserPrincipal principal) {
+        List<CommentResponse> list = commentService.listByUserId(principal.getId());
+        return ResponseEntity.ok(list);
+    }
+
     @PostMapping("/posts/{postId}/comments")
     public ResponseEntity<CommentResponse> createComment(@PathVariable("postId") UUID postId,
                                                          @AuthenticationPrincipal WhalesUserPrincipal principal,
