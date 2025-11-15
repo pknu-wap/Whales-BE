@@ -22,4 +22,14 @@ public interface TagRepository extends JpaRepository<Tag, UUID> {
         ORDER BY COUNT(pt) DESC, t.name ASC
         """)
     List<Tag> findPopularTagsByPrefix(@Param("prefix") String prefix, Pageable pageable);
+
+    // 내가 즐겨찾기한 태그 목록 조회
+    @Query("""
+        SELECT ft.tag
+        FROM FavoriteTag ft
+        WHERE ft.user.id = :userId
+        ORDER BY ft.tag.createdAt ASC
+        """)
+    List<Tag> findFavoriteTagsByUserId(UUID userId);
+
 }

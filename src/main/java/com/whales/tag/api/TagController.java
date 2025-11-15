@@ -73,4 +73,9 @@ public class TagController {
         return ResponseEntity.ok(tagService.autoComplete(keyword, limit));
     }
 
+    // 내가 즐겨찾기한 태그 목록
+    @GetMapping("/tags/my-favorites")
+    public ResponseEntity<List<TagResponse>> getMyFavoriteTags(@AuthenticationPrincipal WhalesUserPrincipal principal) {
+        return ResponseEntity.ok(tagService.getMyFavoriteTags(principal.getId()));
+    }
 }
