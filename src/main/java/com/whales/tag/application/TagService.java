@@ -124,13 +124,6 @@ public class TagService {
                 .collect(Collectors.toList());
     }
 
-    // 내가 즐겨찾기한 태그 목록
-    public List<TagResponse> getMyFavoriteTags(UUID userId) {
-        return tagRepository.findFavoriteTagsByUserId(userId).stream()
-                .map(t -> new TagResponse(t.getId(), t.getName()))
-                .collect(Collectors.toList());
-    }
-
     // ---------- helpers ----------
 
     private Post loadPostWithAuth(UUID postId, UUID authorId) {
