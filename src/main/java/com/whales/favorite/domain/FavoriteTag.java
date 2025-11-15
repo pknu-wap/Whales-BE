@@ -1,35 +1,34 @@
-package com.whales.tag.domain;
+package com.whales.favorite.domain;
 
+import com.whales.tag.domain.Tag;
 import com.whales.user.domain.User;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
 import java.time.Instant;
 import java.util.UUID;
 
-// 즐겨찾기한 태그 엔티티
 @Entity
-@Table(name = "favorite_tags")
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
+@Table(name = "favorite_tags",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "tag_id"}))
 public class FavoriteTag {
 
     @EmbeddedId
     private Id id;
 
-    @MapsId("userId")
     @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("userId")
     private User user;
 
-    @MapsId("tagId")
     @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("tagId")
     private Tag tag;
 
     private Instant createdAt = Instant.now();
 
-    @Builder
     public FavoriteTag(User user, Tag tag) {
         this.id = new Id(user.getId(), tag.getId());
         this.user = user;
@@ -38,15 +37,17 @@ public class FavoriteTag {
 
     @Embeddable
     @Getter
-    @Setter
-    @EqualsAndHashCode
     @NoArgsConstructor
-    @AllArgsConstructor
-    public static class Id implements Serializable {
-        @Column(nullable = false)
+    public static class Id {
+        @Column(name = "user_id")
         private UUID userId;
 
-        @Column(nullable = false)
+        @Column(name = "tag_id")
         private UUID tagId;
+
+        public Id(UUID userId, UUID tagId) {
+            this.userId = userId;
+            this.tagId = tagId;
+        }
     }
 }
