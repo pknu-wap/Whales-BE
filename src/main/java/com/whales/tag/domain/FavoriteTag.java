@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.io.Serializable;
+import java.time.Instant;
 import java.util.UUID;
 
 // 즐겨찾기한 태그 엔티티
@@ -25,6 +26,8 @@ public class FavoriteTag {
     @MapsId("tagId")
     @ManyToOne(fetch = FetchType.LAZY)
     private Tag tag;
+
+    private Instant createdAt = Instant.now();
 
     @Builder
     public FavoriteTag(User user, Tag tag) {
