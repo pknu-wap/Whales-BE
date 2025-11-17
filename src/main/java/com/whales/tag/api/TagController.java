@@ -72,5 +72,4 @@ public class TagController {
                                                         @RequestParam(defaultValue = "5") int limit) {
         return ResponseEntity.ok(tagService.autoComplete(keyword, limit));
     }
-
 }
