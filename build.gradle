@@ -4,7 +4,7 @@ plugins {
 	id 'io.spring.dependency-management' version '1.1.7'
 }
 
-group = 'com.example'
+group = 'com.whales'
 version = '0.0.1-SNAPSHOT'
 description = 'Whales project for Spring Boot'
 
@@ -13,6 +13,11 @@ java {
 		languageVersion = JavaLanguageVersion.of(17)
 	}
 }
+
+springBoot {
+	mainClass = 'com.whales.WhalesApplication'
+}
+
 
 configurations {
 	compileOnly {
@@ -44,21 +49,28 @@ dependencies {
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 
-	// Redis
-	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	// OAuth client (구글 code 교환용)
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 
-	// WebSocket
-	implementation 'org.springframework.boot:spring-boot-starter-websocket'
-
-	// JSON 직렬화 (WebSocket 메시지 변환용)
-	implementation 'com.fasterxml.jackson.core:jackson-databind'
+//	// Redis
+//	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+//
+//	// WebSocket
+//	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+//
+//	// JSON 직렬화 (WebSocket 메시지 변환용)
+//	implementation 'com.fasterxml.jackson.core:jackson-databind'
 
 	// API Docs (Swagger)
-	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13'
 
 	// Dev
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+	// .env 자동으로 읽어줌
+	implementation "me.paulschwarz:spring-dotenv:4.0.0"
+
 }
 
 tasks.named('test') {

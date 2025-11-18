@@ -2,15 +2,19 @@ server:
   port: 8080
   servlet:
     context-path: /api
+    encoding:
+      charset: UTF-8
+      force: true
+      enabled: true
 
 spring:
   application:
     name: whales
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/whales_db
-    username: postgres
-    password: postgres
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -24,3 +28,20 @@ spring:
   sql:
     init:
       mode: always
+
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+
+jwt:
+  secret: ${JWT_SECRET}
+  access:
+    expiration: ${JWT_ACCESS_EXPIRATION}
+
+oauth2:
+  google:
+    client-id: ${GOOGLE_CLIENT_ID}
+    client-secret: ${GOOGLE_CLIENT_SECRET}
+    token-uri: ${GOOGLE_TOKEN_URI}
+    userinfo-uri: ${GOOGLE_USERINFO_URI}
+    redirect-uri: ${GOOGLE_REDIRECT_URI}
