@@ -1,11 +1,19 @@
 package com.whales.auth.api;
 
 import com.whales.auth.application.AuthService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.time.Duration;
 
 @RestController
 @RequestMapping("/auth")
@@ -19,16 +27,63 @@ public class AuthController {
 
     // 프론트 -> 서버
     @PostMapping("/login/google")
-    public ResponseEntity<TokenResponse> loginGoogle(@Valid @RequestBody GoogleLoginRequest request) {
+    public ResponseEntity<LoginResponse> loginGoogle(@Valid @RequestBody GoogleLoginRequest request,
+                                                     HttpServletResponse response,
+                                                     HttpServletRequest httpRequest) {
 
-        TokenResponse token = authService.loginWithGoogle(request);
+        String ua = httpRequest.getHeader("User-Agent");
+        String ip = httpRequest.getRemoteAddr();
+
+        LoginResponse token = authService.loginWithGoogle(
+                new GoogleLoginRequest(
+                        request.code(),
+                        request.redirectUri(),
+                        ua,
+                        ip
+                )
+        );
+
+        // RefreshToken을 HttpOnly 쿠키로 저장
+        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", token.refreshToken())
+                .httpOnly(true)
+                .secure(false) // true: HTTPS 환경에서만 동작
+                .path("/")
+                .maxAge(Duration.ofDays(30))
+                .sameSite("Strict")
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
+
         return ResponseEntity.ok(token);
     }
 
     // 구글 -> 서버 (테스트용)
-    @GetMapping("/login/google/callback")
-    public ResponseEntity<TokenResponse> loginGoogleCallback(@RequestParam("code") String code) {
-        TokenResponse token = authService.loginWithGoogle(new GoogleLoginRequest(code, googleRedirectUri));
-        return ResponseEntity.ok(token);
+//    @GetMapping("/login/google/callback")
+//    public ResponseEntity<TokenResponse> loginGoogleCallback(@RequestParam("code") String code) {
+//        TokenResponse token = authService.loginWithGoogle(new GoogleLoginRequest(code, googleRedirectUri));
+//        return ResponseEntity.ok(token);
+//    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<LoginResponse> refreshAccessToken(@CookieValue(name = "refreshToken", required = false) String refreshToken,
+                                                            HttpServletResponse response){
+        if (refreshToken == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Refresh token missing");
+        }
+
+        LoginResponse newTokens = authService.refreshAccessToken(refreshToken);
+
+        // 새 RefreshToken을 쿠키로 업데이트
+        ResponseCookie cookie = ResponseCookie.from("refreshToken", newTokens.refreshToken())
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(Duration.ofDays(30))
+                .sameSite("Strict")
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        return ResponseEntity.ok(newTokens);
+
     }
 }
