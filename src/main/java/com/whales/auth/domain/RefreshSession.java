@@ -61,4 +61,9 @@ public class RefreshSession {
     public boolean isExpired() {
         return Instant.now().isAfter(expiresAt);
     }
+
+    public void updateToken(String newToken, Instant newExpiresAt) {
+        this.refreshToken = newToken;
+        this.expiresAt = newExpiresAt;
+    }
 }

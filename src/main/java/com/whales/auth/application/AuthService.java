@@ -96,6 +96,13 @@ public class AuthService {
         long expiresInSeconds = Math.floorDiv(accessExpirationMs, 1000L);
 
         String refreshToken = generateRefreshToken();
+
+        // 같은 user + userAgent + ip 조합으로 기존 세션 제거 (중복 방지)
+        refreshSessionRepository.deleteByUser_IdAndUserAgentAndIp(
+                user.getId(),
+                request.userAgent(),
+                request.ip()
+        );
         RefreshSession session = RefreshSession.builder()
                 .user(user)
                 .refreshToken(refreshToken)
@@ -108,5 +115,30 @@ public class AuthService {
         refreshSessionRepository.save(session);
 
         return LoginResponse.from(accessToken, refreshToken, expiresInSeconds, user);
+    }
+
+    public LoginResponse refreshAccessToken(String refreshToken) {
+
+        RefreshSession session = refreshSessionRepository
+                .findByRefreshToken(refreshToken)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid refresh token"));
+
+        if (session.isExpired()) {
+            refreshSessionRepository.delete(session);
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Refresh token expired");
+        }
+
+        User user = session.getUser();
+        String role = user.getRole().name().toLowerCase(Locale.ROOT);
+
+        String newAccessToken = jwtUtil.generateAccessToken(user.getId(), user.getEmail(), role);
+
+        String newRefreshToken = generateRefreshToken();
+        session.updateToken(newRefreshToken, Instant.now().plus(30, ChronoUnit.DAYS));
+        refreshSessionRepository.save(session);
+
+        long expiresInSeconds = Math.floorDiv(accessExpirationMs, 1000L);
+
+        return LoginResponse.from(newAccessToken, newRefreshToken, expiresInSeconds, user);
     }
 }

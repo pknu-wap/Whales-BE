@@ -7,12 +7,11 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Duration;
 
@@ -64,4 +63,27 @@ public class AuthController {
 //        TokenResponse token = authService.loginWithGoogle(new GoogleLoginRequest(code, googleRedirectUri));
 //        return ResponseEntity.ok(token);
 //    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<LoginResponse> refreshAccessToken(@CookieValue(name = "refreshToken", required = false) String refreshToken,
+                                                            HttpServletResponse response){
+        if (refreshToken == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Refresh token missing");
+        }
+
+        LoginResponse newTokens = authService.refreshAccessToken(refreshToken);
+
+        // 새 RefreshToken을 쿠키로 업데이트
+        ResponseCookie cookie = ResponseCookie.from("refreshToken", newTokens.refreshToken())
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(Duration.ofDays(30))
+                .sameSite("Strict")
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        return ResponseEntity.ok(newTokens);
+
+    }
 }
