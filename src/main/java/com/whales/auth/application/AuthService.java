@@ -141,4 +141,30 @@ public class AuthService {
 
         return LoginResponse.from(newAccessToken, newRefreshToken, expiresInSeconds, user);
     }
+
+    // 현재 기기에서만 로그아웃 (해당 RefreshToken 세션만 삭제)
+    @Transactional
+    public void logoutCurrentSession(String refreshToken) {
+        if (refreshToken == null || refreshToken.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Refresh token is required");
+        }
+
+        Optional<RefreshSession> sessionOpt = refreshSessionRepository.findByRefreshToken(refreshToken);
+        if (sessionOpt.isEmpty()) {
+            // 이미 삭제됐거나 잘못된 토큰일 수 있으니 404보단 400/401 정도 선택
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Refresh session not found");
+        }
+
+        refreshSessionRepository.delete(sessionOpt.get());
+    }
+
+    // 해당 유저의 모든 세션 로그아웃 (모든 기기에서 로그아웃)
+    @Transactional
+    public void logoutAllSessions(UUID userId) {
+        if (userId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User id is required");
+        }
+
+        refreshSessionRepository.deleteByUser_Id(userId);
+    }
 }

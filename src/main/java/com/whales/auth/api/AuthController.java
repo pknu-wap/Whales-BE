@@ -1,6 +1,7 @@
 package com.whales.auth.api;
 
 import com.whales.auth.application.AuthService;
+import com.whales.security.WhalesUserPrincipal;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -10,6 +11,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -85,5 +87,38 @@ public class AuthController {
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
         return ResponseEntity.ok(newTokens);
 
+    }
+
+    // 프론트 적용 필요
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(
+            @AuthenticationPrincipal WhalesUserPrincipal principal,
+            @CookieValue(name = "refreshToken", required = false) String refreshToken,
+            HttpServletResponse response
+    ) {
+        if (principal == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not logged in");
+        }
+
+        if (refreshToken != null && !refreshToken.isBlank()) {
+            // 현재 기기 로그아웃
+            authService.logoutCurrentSession(refreshToken);
+        } else {
+            // 쿠키가 없으면 그냥 전체 세션 삭제 (방어적)
+            authService.logoutAllSessions(principal.getId());
+        }
+
+        // RefreshToken 쿠키 삭제
+        ResponseCookie cookie = ResponseCookie.from("refreshToken", "")
+                .httpOnly(true)
+                .secure(false) // HTTPS면 true
+                .path("/")
+                .maxAge(0) // 즉시 만료
+                .sameSite("Strict")
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+
+        return ResponseEntity.noContent().build();
     }
 }
