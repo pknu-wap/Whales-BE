@@ -47,7 +47,7 @@ public class AuthController {
         // RefreshToken을 HttpOnly 쿠키로 저장
         ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", token.refreshToken())
                 .httpOnly(true)
-                .secure(true) // HTTPS 환경에서만 동작
+                .secure(false) // true: HTTPS 환경에서만 동작
                 .path("/")
                 .maxAge(Duration.ofDays(30))
                 .sameSite("Strict")
