@@ -48,4 +48,9 @@ public class NotificationController {
     public long getUnreadCount(@AuthenticationPrincipal WhalesUserPrincipal principal) {
         return notificationService.getUnreadCount(principal.getId());
     }
+
+    @GetMapping("/unread")
+    public List<NotificationResponse> getUnread(@AuthenticationPrincipal WhalesUserPrincipal principal) {
+        return notificationService.getUnreadNotifications(principal.getId());
+    }
 }

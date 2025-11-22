@@ -70,4 +70,12 @@ public class NotificationService {
     public long getUnreadCount(UUID userId) {
         return notificationRepository.countByReceiver_IdAndReadFalse(userId);
     }
+
+    public List<NotificationResponse> getUnreadNotifications(UUID userId) {
+        return notificationRepository
+                .findByReceiver_IdAndReadFalseOrderByCreatedAtDesc(userId)
+                .stream()
+                .map(NotificationResponse::from)
+                .toList();
+    }
 }
