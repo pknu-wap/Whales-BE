@@ -45,4 +45,23 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
         ORDER BY p.createdAt DESC
     """)
     List<Post> searchByKeyword(@Param("keyword") String keyword);
+
+    // 태그 AND 제목/내용까지 모두 만족하는 검색
+    @Query("""
+        SELECT p
+        FROM Post p
+        JOIN p.postTags pt
+        JOIN pt.tag t
+        WHERE LOWER(t.name) IN :names
+          AND (
+                LOWER(p.title)   LIKE LOWER(CONCAT('%', :keyword, '%'))
+             OR LOWER(p.content) LIKE LOWER(CONCAT('%', :keyword, '%'))
+          )
+        GROUP BY p
+        HAVING COUNT(DISTINCT t.id) = :tagCount
+        ORDER BY p.createdAt DESC
+    """)
+    List<Post> searchByTagsAndKeyword(@Param("names") List<String> names,
+                                      @Param("tagCount") Integer tagCount,
+                                      @Param("keyword") String keyword);
 }

@@ -22,19 +22,30 @@ public class SearchService {
 
     public List<Post> search(String rawKeyword, User user) {
 
-        // 기록 저장
         saveSearchHistory(rawKeyword, user);
 
-        String keyword = keywordParser.normalizeKeyword(rawKeyword);
+        // 정규화
+        String normalized = keywordParser.normalizeKeyword(rawKeyword);
 
-        // #태그 검색
-        if (keywordParser.isTagSearch(keyword)) {
-            List<String> tags = keywordParser.extractTags(keyword);
+        // 태그 + 일반 키워드 분리
+        List<String> tags = keywordParser.extractTags(normalized);
+        String textKeyword = keywordParser.extractNormalKeyword(normalized);
+
+        boolean hasTags = !tags.isEmpty();
+        boolean hasText = textKeyword != null && !textKeyword.isBlank();
+
+        // 1) 태그 + 일반 키워드 조합 검색
+        if (hasTags && hasText) {
+            return postRepository.searchByTagsAndKeyword(tags, tags.size(), textKeyword);
+        }
+
+        // 2) 태그만 검색
+        if (hasTags) {
             return postRepository.findPostsByAllTagNames(tags, tags.size());
         }
 
-        // 제목 or 내용 검색
-        return postRepository.searchByKeyword(keyword);
+        // 3) 일반 키워드만 검색
+        return postRepository.searchByKeyword(textKeyword);
     }
 
     /** 검색 기록 저장 */
@@ -52,7 +63,6 @@ public class SearchService {
                 );
     }
 
-    /** 검색 기록 조회 */
     public List<SearchHistory> getHistory(User user) {
         return historyRepository.findByUserOrderBySearchedAtDesc(user);
     }

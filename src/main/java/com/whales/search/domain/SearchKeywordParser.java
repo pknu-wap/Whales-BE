@@ -8,15 +8,23 @@ import java.util.List;
 @Component
 public class SearchKeywordParser {
 
-    public boolean isTagSearch(String keyword) {
-        return keyword.trim().startsWith("#");
+    public boolean isTag(String part) {
+        return part.startsWith("#");
     }
 
-    public List<String> extractTags(String keyword) {
-        return Arrays.stream(keyword.split("#"))
-                .filter(s -> !s.isBlank())
-                .map(s -> s.trim().toLowerCase())
+    public List<String> extractTags(String normalized) {
+        return Arrays.stream(normalized.split("\\s+"))
+                .filter(p -> p.startsWith("#"))
+                .map(p -> p.replace("#", "").trim().toLowerCase())
+                .filter(p -> !p.isBlank())
                 .toList();
+    }
+
+    public String extractNormalKeyword(String normalized) {
+        return Arrays.stream(normalized.split("\\s+"))
+                .filter(p -> !p.startsWith("#"))
+                .reduce("", (a, b) -> a + " " + b)
+                .trim();
     }
 
     public String normalizeKeyword(String keyword) {
