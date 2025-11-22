@@ -22,6 +22,15 @@ public class Notification {
     @JoinColumn(name = "receiver_id", nullable = false)
     private User receiver;
 
+    @Column(name = "post_id", nullable = false)
+    private UUID postId;
+
+    @Column(name = "comment_id")
+    private UUID commentId;
+
+    @Column(name = "sender_name", nullable = false, length = 100)
+    private String senderName;
+
     @Column(nullable = false, length = 255)
     private String message;
 
@@ -31,8 +40,11 @@ public class Notification {
     @Column(nullable = false)
     private Instant createdAt;
 
-    public Notification(User receiver, String message) {
+    public Notification(User receiver, UUID postId, UUID commentId, String senderName, String message) {
         this.receiver = receiver;
+        this.postId = postId;
+        this.commentId = commentId;
+        this.senderName = senderName;
         this.message = message;
         this.read = false;
         this.createdAt = Instant.now();
