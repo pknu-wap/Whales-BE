@@ -1,10 +1,11 @@
 package com.whales.notification.application;
 
+import com.whales.comment.domain.Comment;
 import com.whales.notification.api.NotificationResponse;
 import com.whales.notification.domain.Notification;
 import com.whales.notification.domain.NotificationRepository;
 import com.whales.notification.sse.SseEmitterManager;
-import com.whales.user.domain.User;
+import com.whales.post.domain.Post;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,13 +19,19 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final SseEmitterManager emitterManager;
 
-    public void notify(User receiver, String message) {
+    public void notifyNewComment(Post post, Comment comment) {
         // 1) DB 저장
-        Notification notification = new Notification(receiver, message);
+        Notification notification = new Notification(
+                post.getAuthor(),
+                post.getId(),
+                comment.getId(),
+                comment.getAuthor().getDisplayName(),
+                "새로운 댓글이 달렸습니다."
+        );
         notificationRepository.save(notification);
 
         // 2) SSE 실시간 전송
-        emitterManager.send(receiver.getId(), NotificationResponse.from(notification));
+        emitterManager.send(post.getAuthor().getId(), NotificationResponse.from(notification));
     }
 
     public List<NotificationResponse> getMyNotifications(UUID userId) {
