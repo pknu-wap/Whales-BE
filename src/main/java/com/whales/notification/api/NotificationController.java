@@ -44,4 +44,8 @@ public class NotificationController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/unread-count")
+    public long getUnreadCount(@AuthenticationPrincipal WhalesUserPrincipal principal) {
+        return notificationService.getUnreadCount(principal.getId());
+    }
 }

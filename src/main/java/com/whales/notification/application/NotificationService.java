@@ -66,4 +66,8 @@ public class NotificationService {
         list.forEach(n -> n.setRead(true));
         notificationRepository.saveAll(list);
     }
+
+    public long getUnreadCount(UUID userId) {
+        return notificationRepository.countByReceiver_IdAndReadFalse(userId);
+    }
 }
