@@ -60,11 +60,8 @@ public class NotificationService {
     }
 
     @Transactional
-    public void markAllAsRead(UUID userId) {
-        List<Notification> list = notificationRepository.findByReceiver_IdOrderByCreatedAtDesc(userId);
-
-        list.forEach(n -> n.setRead(true));
-        notificationRepository.saveAll(list);
+    public void markUnreadAsRead(UUID userId) {
+        notificationRepository.markUnreadAsRead(userId);
     }
 
     public long getUnreadCount(UUID userId) {

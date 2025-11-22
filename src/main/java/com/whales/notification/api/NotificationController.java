@@ -38,9 +38,9 @@ public class NotificationController {
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/read-all")
-    public ResponseEntity<Void> markAllAsRead(@AuthenticationPrincipal WhalesUserPrincipal principal) {
-        notificationService.markAllAsRead(principal.getId());
+    @PatchMapping("/read/unread")
+    public ResponseEntity<Void> markUnreadAsRead(@AuthenticationPrincipal WhalesUserPrincipal principal) {
+        notificationService.markUnreadAsRead(principal.getId());
         return ResponseEntity.noContent().build();
     }
 
