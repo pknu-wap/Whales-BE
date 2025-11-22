@@ -7,7 +7,10 @@ import com.whales.notification.domain.NotificationRepository;
 import com.whales.notification.sse.SseEmitterManager;
 import com.whales.post.domain.Post;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.UUID;
@@ -39,5 +42,28 @@ public class NotificationService {
                 .stream()
                 .map(NotificationResponse::from)
                 .toList();
+    }
+
+    @Transactional
+    public void markAsRead(UUID notificationId, UUID userId) {
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Notification not found"));
+
+        if (!notification.getReceiver().getId().equals(userId)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
+        }
+
+        if (!notification.isRead()) {
+            notification.setRead(true);
+            notificationRepository.save(notification);
+        }
+    }
+
+    @Transactional
+    public void markAllAsRead(UUID userId) {
+        List<Notification> list = notificationRepository.findByReceiver_IdOrderByCreatedAtDesc(userId);
+
+        list.forEach(n -> n.setRead(true));
+        notificationRepository.saveAll(list);
     }
 }

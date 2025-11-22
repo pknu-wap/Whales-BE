@@ -5,13 +5,13 @@ import com.whales.notification.sse.SseEmitterManager;
 import com.whales.security.WhalesUserPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -30,4 +30,18 @@ public class NotificationController {
     public List<NotificationResponse> listMyNotifications(@AuthenticationPrincipal WhalesUserPrincipal principal) {
         return notificationService.getMyNotifications(principal.getId());
     }
+
+    @PatchMapping("/{id}/read")
+    public ResponseEntity<Void> markAsRead(@PathVariable UUID id,
+                                           @AuthenticationPrincipal WhalesUserPrincipal principal) {
+        notificationService.markAsRead(id, principal.getId());
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/read-all")
+    public ResponseEntity<Void> markAllAsRead(@AuthenticationPrincipal WhalesUserPrincipal principal) {
+        notificationService.markAllAsRead(principal.getId());
+        return ResponseEntity.noContent().build();
+    }
+
 }
