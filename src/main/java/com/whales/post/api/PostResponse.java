@@ -18,9 +18,10 @@ public record PostResponse (
         String authorName,
         Instant createdAt,
         Instant updatedAt,
+        long commentCount,
         ReactionSummary reactions
 ){
-    public static PostResponse from(Post post, ReactionSummary reactions) {
+    public static PostResponse from(Post post, long commentCount, ReactionSummary reactions) {
         return new PostResponse(
                 post.getId(),
                 post.getTitle(),
@@ -31,22 +32,8 @@ public record PostResponse (
                 post.getAuthor().getDisplayName(),
                 post.getCreatedAt(),
                 post.getUpdatedAt(),
+                commentCount,
                 reactions
-        );
-    }
-
-    public static PostResponse from(Post post) {
-        return new PostResponse(
-                post.getId(),
-                post.getTitle(),
-                post.getContent(),
-                post.getPostTags().stream()
-                        .map(pt -> new TagResponse(pt.getTag().getId(), pt.getTag().getName()))
-                        .collect(Collectors.toList()),
-                post.getAuthor().getDisplayName(),
-                post.getCreatedAt(),
-                post.getUpdatedAt(),
-                null
         );
     }
 }
