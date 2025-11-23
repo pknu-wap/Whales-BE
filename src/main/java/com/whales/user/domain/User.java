@@ -56,6 +56,10 @@ public class User {
     @Column(name = "trust_score", nullable = false)
     private int trustScore = 0;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TrustLevel trustLevel = TrustLevel.ROOKIE;
+
     @PrePersist
     void onCreate() {
         this.createdAt = Instant.now();

@@ -1,9 +1,6 @@
 package com.whales.user.application;
 
-import com.whales.user.domain.User;
-import com.whales.user.domain.UserMetrics;
-import com.whales.user.domain.UserMetricsRepository;
-import com.whales.user.domain.UserRepository;
+import com.whales.user.domain.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,7 +29,15 @@ public class TrustScoreService {
             int score = calculateTrustScoreFor(metrics, user);
 
             user.setTrustScore(score);
+            user.setTrustLevel(calculateLevel(score));
         }
+    }
+
+    private TrustLevel calculateLevel(int score) {
+        if (score <= 30) return TrustLevel.ROOKIE;
+        if (score <= 60) return TrustLevel.MEMBER;
+        if (score <= 85) return TrustLevel.EXPERT;
+        return TrustLevel.WHALE;
     }
 
     private int calculateTrustScoreFor(UserMetrics metrics, User user) {
