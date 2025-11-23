@@ -6,9 +6,7 @@ import com.whales.auth.domain.RefreshSession;
 import com.whales.auth.domain.RefreshSessionRepository;
 import com.whales.auth.infra.GoogleOAuthService;
 import com.whales.security.JwtUtil;
-import com.whales.user.domain.User;
-import com.whales.user.domain.UserRepository;
-import com.whales.user.domain.UserRole;
+import com.whales.user.domain.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -30,6 +28,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
     private final RefreshSessionRepository refreshSessionRepository;
+    private final UserMetricsRepository userMetricsRepository;
 
     @Value("${jwt.access.expiration}")
     private long accessExpirationMs;
@@ -88,6 +87,12 @@ public class AuthService {
 
         if (user.getId() == null) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to persist user");
+        }
+
+        // userMetrics 생성
+        UserMetrics metrics = userMetricsRepository.findById(user.getId()).orElse(null);
+        if (metrics == null) {
+            userMetricsRepository.save(new UserMetrics(user));
         }
 
         // 4) JWT 발급

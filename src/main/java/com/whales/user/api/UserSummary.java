@@ -1,6 +1,8 @@
 package com.whales.user.api;
 
+import com.whales.user.domain.TrustLevel;
 import com.whales.user.domain.User;
+import com.whales.user.domain.UserBadgeColor;
 
 import java.util.UUID;
 
@@ -8,7 +10,8 @@ public record UserSummary(
         UUID id,
         String displayName,
         String email,
-        String nicknameColor
+        UserBadgeColor badgeColor,
+        TrustLevel trustLevel
 ) {
     public static UserSummary from(User user) {
         if (user == null) return null;
@@ -16,7 +19,8 @@ public record UserSummary(
                 user.getId(),
                 user.getDisplayName(),
                 user.getEmail(),
-                user.getNicknameColor() != null ? user.getNicknameColor() : "GRAY"
+                user.getBadgeColor(),
+                user.getTrustLevel()
         );
     }
 }

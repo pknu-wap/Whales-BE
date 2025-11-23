@@ -1,7 +1,7 @@
 package com.whales.user.api;
 
-import com.whales.user.application.UserService;
 import com.whales.security.WhalesUserPrincipal;
+import com.whales.user.application.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,19 +20,19 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/me")
-    public ResponseEntity<MeResponse> me(@AuthenticationPrincipal WhalesUserPrincipal principal) {
+    public ResponseEntity<UserResponse> me(@AuthenticationPrincipal WhalesUserPrincipal principal) {
         if (principal == null) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
 
-        MeResponse dto = userService.getProfile(principal.getId());
+        UserResponse dto = userService.getProfile(principal.getId());
         return ResponseEntity.ok(dto);
     }
 
     @PutMapping("/me")
-    public ResponseEntity<MeResponse> updateMe(@AuthenticationPrincipal WhalesUserPrincipal principal,
-                                               @Valid @RequestBody UpdateProfileRequest request) {
+    public ResponseEntity<UserResponse> updateMe(@AuthenticationPrincipal WhalesUserPrincipal principal,
+                                                 @Valid @RequestBody UpdateProfileRequest request) {
         if (principal == null) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
 
-        MeResponse dto = userService.updateProfile(principal.getId(), request);
+        UserResponse dto = userService.updateProfile(principal.getId(), request);
         return ResponseEntity.ok(dto);
     }
 }

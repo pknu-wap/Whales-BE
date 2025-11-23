@@ -1,7 +1,7 @@
 package com.whales.user.application;
 
 import com.whales.user.api.UpdateProfileRequest;
-import com.whales.user.api.MeResponse;
+import com.whales.user.api.UserResponse;
 import com.whales.user.domain.User;
 import com.whales.user.domain.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,15 +20,15 @@ public class UserService {
     private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
-    public MeResponse getProfile(UUID userId) {
+    public UserResponse getProfile(UUID userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-        return MeResponse.from(user);
+        return UserResponse.from(user);
     }
 
     @Transactional
-    public MeResponse updateProfile(UUID userId, UpdateProfileRequest request) {
+    public UserResponse updateProfile(UUID userId, UpdateProfileRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() ->  new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
@@ -44,6 +44,6 @@ public class UserService {
 
         User savedUser = userRepository.save(user);
 
-        return MeResponse.from(savedUser);
+        return UserResponse.from(savedUser);
     }
 }
