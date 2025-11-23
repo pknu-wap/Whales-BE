@@ -8,14 +8,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
 import java.util.UUID;
 
 @Component
@@ -28,26 +25,36 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
+
         final String authHeader = request.getHeader("Authorization");
 
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            final String token = authHeader.substring(7); // "Bearer " 이후 문자열
-            try {
-                Claims claims = jwtUtil.validateAndParse(token);
-                UUID userId = jwtUtil.extractUserId(claims);
-                String email = jwtUtil.extractEmail(claims);
-                String role = jwtUtil.extractRole(claims);
-
-                WhalesUserPrincipal principal = new WhalesUserPrincipal(userId, email, role, true);
-
-                Authentication authentication =
-                        new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities());
-
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-            } catch (Exception ex) {
-                // 유효하지 않은 토큰이면 인증 없이 통과 → 컨트롤러에서 401/403 처리
-            }
+        // Authorization 헤더 없음 → 인증 없이 진행 (public API용)
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            filterChain.doFilter(request, response);
+            return;
         }
+
+        final String token = authHeader.substring(7);
+
+        try {
+            Claims claims = jwtUtil.validateAndParse(token);
+            UUID userId = jwtUtil.extractUserId(claims);
+            String email = jwtUtil.extractEmail(claims);
+            String role = jwtUtil.extractRole(claims);
+
+            WhalesUserPrincipal principal = new WhalesUserPrincipal(userId, email, role, true);
+
+            Authentication authentication =
+                    new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities());
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        } catch (Exception ex) {
+            // Access Token 문제 → 반드시 401 반환해야 함
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        }
+
         filterChain.doFilter(request, response);
     }
 }

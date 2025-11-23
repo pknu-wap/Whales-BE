@@ -6,6 +6,7 @@ import com.whales.comment.api.UpdateCommentRequest;
 import com.whales.comment.domain.Comment;
 import com.whales.comment.domain.CommentRepository;
 import com.whales.common.ContentStatus;
+import com.whales.notification.application.NotificationService;
 import com.whales.post.domain.Post;
 import com.whales.post.domain.PostRepository;
 import com.whales.reaction.api.ReactionSummary;
@@ -31,6 +32,7 @@ public class CommentService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final CommentReactionService commentReactionService;
+    private final NotificationService notificationService;
 
     public List<CommentResponse> listByPost (UUID postId, UUID userId) {
         List<Comment> commentList = commentRepository
@@ -69,6 +71,10 @@ public class CommentService {
 
         Comment comment = new Comment(post, author, request.body()) ;
         Comment saved = commentRepository.save(comment);
+
+        if (!post.getAuthor().getId().equals(authorId)) {
+            notificationService.notifyNewComment(post, saved);
+        }
 
         ReactionSummary emptyReactions = new ReactionSummary(0, 0, null);
         return CommentResponse.from(saved, emptyReactions);
