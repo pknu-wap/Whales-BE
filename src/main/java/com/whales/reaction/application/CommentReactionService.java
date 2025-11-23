@@ -6,6 +6,7 @@ import com.whales.reaction.api.ReactionSummary;
 import com.whales.reaction.domain.CommentReaction;
 import com.whales.reaction.domain.CommentReactionRepository;
 import com.whales.reaction.domain.ReactionType;
+import com.whales.user.application.UserMetricsService;
 import com.whales.user.domain.User;
 import com.whales.user.domain.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ public class CommentReactionService extends ReactionService<CommentReaction> {
     private final CommentReactionRepository commentReactionRepository;
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
+    private final UserMetricsService userMetricsService;
 
     @Transactional
     public void toggle(UUID commentId, UUID userId, ReactionType type) {
@@ -32,8 +34,19 @@ public class CommentReactionService extends ReactionService<CommentReaction> {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment not found"));
+
         Optional<CommentReaction> existing = commentReactionRepository.findByUser_IdAndComment_Id(userId, commentId);
-        toggleReaction(existing , new CommentReaction(user, comment, type), type);
+
+        ReactionType before = existing.map(CommentReaction::getType).orElse(null);
+
+        toggleReaction(existing, new CommentReaction(user, comment, type), type);
+
+        if (before != type) {
+            if (type == ReactionType.LIKE) {
+                userMetricsService.increaseLikesGiven(userId);
+                userMetricsService.increaseLikesReceived(comment.getAuthor().getId());
+            }
+        }
     }
 
     @Transactional(readOnly = true)

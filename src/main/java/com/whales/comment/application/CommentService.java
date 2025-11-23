@@ -11,6 +11,7 @@ import com.whales.post.domain.Post;
 import com.whales.post.domain.PostRepository;
 import com.whales.reaction.api.ReactionSummary;
 import com.whales.reaction.application.CommentReactionService;
+import com.whales.user.application.UserMetricsService;
 import com.whales.user.domain.User;
 import com.whales.user.domain.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +34,7 @@ public class CommentService {
     private final UserRepository userRepository;
     private final CommentReactionService commentReactionService;
     private final NotificationService notificationService;
+    private final UserMetricsService userMetricsService;
 
     public List<CommentResponse> listByPost (UUID postId, UUID userId) {
         List<Comment> commentList = commentRepository
@@ -77,6 +79,9 @@ public class CommentService {
         }
 
         ReactionSummary emptyReactions = new ReactionSummary(0, 0, null);
+
+        userMetricsService.increaseCommentCount(authorId);
+
         return CommentResponse.from(saved, emptyReactions);
     }
 
