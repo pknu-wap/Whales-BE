@@ -29,9 +29,9 @@ public class User {
     @Column(name = "display_name", length = 40, nullable = false)
     private String displayName;
 
-    // 닉네임 색상 캐시 (UI 표시용)
-    @Column(name = "nickname_color", length = 16, nullable = false)
-    private String nicknameColor = "Gray";
+    @Enumerated(EnumType.STRING)
+    @Column(name = "badge_color", nullable = false, length = 16)
+    private UserBadgeColor badgeColor = UserBadgeColor.WHITE;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
