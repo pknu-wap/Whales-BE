@@ -6,11 +6,13 @@ import com.whales.search.domain.SearchHistory;
 import com.whales.search.domain.SearchHistoryRepository;
 import com.whales.search.domain.SearchKeywordParser;
 import com.whales.user.domain.User;
+import com.whales.user.domain.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -19,10 +21,18 @@ public class SearchService {
     private final PostRepository postRepository;
     private final SearchHistoryRepository historyRepository;
     private final SearchKeywordParser keywordParser;
+    private final UserRepository userRepository;
 
-    public List<Post> search(String rawKeyword, User user) {
+    public List<Post> search(String rawKeyword, UUID userId){
 
-        saveSearchHistory(rawKeyword, user);
+
+        User user = null;
+        if (userId != null) {
+            user = userRepository.findById(userId)
+                    .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
+            // 로그인 한 경우에만 검색 기록 저장
+            saveSearchHistory(rawKeyword, user);
+        }
 
         // 정규화
         String normalized = keywordParser.normalizeKeyword(rawKeyword);
@@ -63,7 +73,14 @@ public class SearchService {
                 );
     }
 
-    public List<SearchHistory> getHistory(User user) {
+    public List<SearchHistory> getHistory(UUID userId) {
+        if (userId == null) {
+            return List.of();
+        }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
+
         return historyRepository.findByUserOrderBySearchedAtDesc(user);
     }
 }
