@@ -1,5 +1,6 @@
 package com.whales.post.application;
 
+import com.whales.comment.domain.CommentRepository;
 import com.whales.post.api.CreatePostRequest;
 import com.whales.post.api.PostResponse;
 import com.whales.post.api.UpdatePostRequest;
@@ -32,12 +33,17 @@ public class PostService {
     private final TagService tagService;
     private final PostReactionService postReactionService;
     private final UserMetricsService userMetricsService;
+    private final CommentRepository commentRepository;
 
     // 전체 조회
     public List<PostResponse> getAllPosts() {
-        return postRepository.findAll()
-                .stream()
-                .map(PostResponse::from)
+        return postRepository.findAll().stream()
+                .map(post -> {
+                    long commentCount = commentRepository.countByPost_Id(post.getId());
+                    ReactionSummary reactions = postReactionService.getReactionSummaryWithoutUser(post.getId());
+
+                    return PostResponse.from(post, commentCount, reactions);
+                })
                 .collect(Collectors.toList());
     }
 
@@ -45,8 +51,9 @@ public class PostService {
     public PostResponse getPostById(UUID postId, UUID userId) {
         Post post = loadPost(postId);
 
+        long commentCount = commentRepository.countByPost_Id(post.getId());
         ReactionSummary reactions = postReactionService.getReactionSummary(postId, userId);
-        return PostResponse.from(post, reactions);
+        return PostResponse.from(post, commentCount, reactions);
     }
 
     /**
@@ -73,7 +80,9 @@ public class PostService {
 
         userMetricsService.increasePostCount(authorId);
 
-        return PostResponse.from(refreshed);
+        long commentCount = 0;
+        ReactionSummary reactions = postReactionService.getReactionSummaryWithoutUser(refreshed.getId());
+        return PostResponse.from(refreshed, commentCount, reactions);
     }
 
     /**
@@ -94,7 +103,10 @@ public class PostService {
 
         Post refreshed = postRepository.findByIdWithTagsAndAuthor(saved.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        return PostResponse.from(refreshed);
+
+        long commentCount = commentRepository.countByPost_Id(refreshed.getId());
+        ReactionSummary reactions = postReactionService.getReactionSummaryWithoutUser(refreshed.getId());
+        return PostResponse.from(refreshed, commentCount, reactions);
     }
 
     // 삭제
@@ -107,8 +119,14 @@ public class PostService {
     @Transactional(readOnly = true)
     public List<PostResponse> searchPosts(String query) {
         List<Post> results = postRepository.searchByKeyword(query);
+
         return results.stream()
-                .map(PostResponse::from)
+                .map(post -> {
+                    long commentCount = commentRepository.countByPost_Id(post.getId());
+                    ReactionSummary reactions = postReactionService.getReactionSummaryWithoutUser(post.getId());
+
+                    return PostResponse.from(post, commentCount, reactions);
+                })
                 .collect(Collectors.toList());
     }
 

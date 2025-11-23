@@ -58,6 +58,20 @@ public class PostReactionService extends ReactionService<PostReaction> {
         return aggregateReactionSummary(postId, userId);
     }
 
+    @Transactional(readOnly = true)
+    public ReactionSummary getReactionSummaryWithoutUser(UUID postId) {
+        List<Object[]> results = postReactionRepository.getReactionSummary(postId, null);
+        if (results == null || results.isEmpty()) {
+            return new ReactionSummary(0, 0, null);
+        }
+
+        Object[] row = results.get(0);
+        long likeCount = row[0] instanceof Number ? ((Number) row[0]).longValue() : 0L;
+        long dislikeCount = row[1] instanceof Number ? ((Number) row[1]).longValue() : 0L;
+
+        return new ReactionSummary(likeCount, dislikeCount, null); // myReaction = null
+    }
+
     @Override
     protected Optional<PostReaction> findReactionByUserAndTargetId(UUID userId, UUID postId) {
         return postReactionRepository.findByUser_IdAndPost_Id(userId, postId);

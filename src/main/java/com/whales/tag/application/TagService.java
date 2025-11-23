@@ -1,8 +1,11 @@
 package com.whales.tag.application;
 
+import com.whales.comment.domain.CommentRepository;
 import com.whales.post.api.PostResponse;
 import com.whales.post.domain.Post;
 import com.whales.post.domain.PostRepository;
+import com.whales.reaction.api.ReactionSummary;
+import com.whales.reaction.application.PostReactionService;
 import com.whales.tag.api.TagListRequest;
 import com.whales.tag.api.TagRequest;
 import com.whales.tag.api.TagResponse;
@@ -29,6 +32,8 @@ public class TagService {
     private final TagRepository tagRepository;
     private final PostTagRepository postTagRepository;
     private final PostRepository postRepository;
+    private final CommentRepository commentRepository;
+    private final PostReactionService postReactionService;
 
     // 게시글에 연결된 태그 조회
     public List<TagResponse> listByPost(UUID postId) {
@@ -107,8 +112,13 @@ public class TagService {
 
         List<Post> posts = postRepository.findPostsByAllTagNames(normalized, normalized.size());
         return posts.stream()
-                .map(PostResponse::from)
-                .toList();
+                .map(post -> {
+                    long commentCount = commentRepository.countByPost_Id(post.getId());
+                    ReactionSummary reactions = postReactionService.getReactionSummaryWithoutUser(post.getId());
+
+                    return PostResponse.from(post, commentCount, reactions);
+                })
+                .collect(Collectors.toList());
     }
 
     // 태그 자동완성

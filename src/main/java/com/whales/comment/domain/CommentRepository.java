@@ -15,5 +15,5 @@ public interface CommentRepository extends JpaRepository<Comment, UUID> {
 
     List<Comment> findByAuthor_IdAndDeletedAtIsNullAndStatusOrderByCreatedAtDesc(UUID userId, Enum<?> status);
 
-    boolean existsByIdAndAuthor_Id(UUID id, UUID authorId);
+    long countByPost_Id(UUID postId);
 }
