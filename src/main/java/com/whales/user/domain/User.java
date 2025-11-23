@@ -53,6 +53,9 @@ public class User {
     @Column(name = "deleted_at")
     private Instant deletedAt;
 
+    @Column(name = "trust_score")
+    private int trustScore = 0;
+
     @PrePersist
     void onCreate() {
         this.createdAt = Instant.now();
