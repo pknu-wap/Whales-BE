@@ -30,6 +30,7 @@ public class TrustScoreService {
 
             user.setTrustScore(score);
             user.setTrustLevel(calculateLevel(score));
+            user.setBadgeColor(determineBadgeColor(user, metrics));
         }
     }
 
@@ -38,6 +39,22 @@ public class TrustScoreService {
         if (score <= 60) return TrustLevel.MEMBER;
         if (score <= 85) return TrustLevel.EXPERT;
         return TrustLevel.WHALE;
+    }
+
+    private UserBadgeColor determineBadgeColor(User user, UserMetrics metrics) {
+
+        // 최우선 규칙
+        if (metrics.getReportsCount() >= 10) return UserBadgeColor.RED;
+        if (metrics.getReportsCount() >= 3) return UserBadgeColor.ORANGE;
+
+        int score = user.getTrustScore();
+
+        if (score < 10) return UserBadgeColor.WHITE;
+        if (score < 25) return UserBadgeColor.GRAY;
+        if (score < 40) return UserBadgeColor.GREEN;
+        if (score < 60) return UserBadgeColor.BLUE;
+        if (score < 80) return UserBadgeColor.PURPLE;
+        return UserBadgeColor.GOLD;
     }
 
     private int calculateTrustScoreFor(UserMetrics metrics, User user) {
