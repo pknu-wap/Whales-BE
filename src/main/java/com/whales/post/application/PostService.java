@@ -9,6 +9,7 @@ import com.whales.reaction.api.ReactionSummary;
 import com.whales.reaction.application.PostReactionService;
 import com.whales.tag.api.TagListRequest;
 import com.whales.tag.application.TagService;
+import com.whales.user.application.UserMetricsService;
 import com.whales.user.domain.User;
 import com.whales.user.domain.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,7 @@ public class PostService {
     private final UserRepository userRepository;
     private final TagService tagService;
     private final PostReactionService postReactionService;
+    private final UserMetricsService userMetricsService;
 
     // 전체 조회
     public List<PostResponse> getAllPosts() {
@@ -68,6 +70,9 @@ public class PostService {
         // 태그 반영된 최신 엔티티 다시 조회
         Post refreshed = postRepository.findByIdWithTagsAndAuthor(saved.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        userMetricsService.increasePostCount(authorId);
+
         return PostResponse.from(refreshed);
     }
 

@@ -6,6 +6,7 @@ import com.whales.reaction.api.ReactionSummary;
 import com.whales.reaction.domain.PostReaction;
 import com.whales.reaction.domain.PostReactionRepository;
 import com.whales.reaction.domain.ReactionType;
+import com.whales.user.application.UserMetricsService;
 import com.whales.user.domain.User;
 import com.whales.user.domain.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ public class PostReactionService extends ReactionService<PostReaction> {
     private final PostReactionRepository postReactionRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final UserMetricsService userMetricsService;
 
     @Transactional
     public void toggle(UUID postId, UUID userId, ReactionType type) {
@@ -33,8 +35,22 @@ public class PostReactionService extends ReactionService<PostReaction> {
 
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
+
         Optional<PostReaction> existing = postReactionRepository.findByUser_IdAndPost_Id(userId, postId);
+
+        // 기존 반응 상태
+        ReactionType before = existing.map(PostReaction::getType).orElse(null);
+
+        // 토글 수행
         toggleReaction(existing, new PostReaction(user, post, type), type);
+
+        if (before != type) {
+            // 좋아요를 새로 눌렀거나 싫어요 → 좋아요로 변경 시
+            if (type == ReactionType.LIKE) {
+                userMetricsService.increaseLikesGiven(userId);
+                userMetricsService.increaseLikesReceived(post.getAuthor().getId());
+            }
+        }
     }
 
     @Transactional(readOnly = true)
