@@ -53,7 +53,7 @@ public class User {
     @Column(name = "deleted_at")
     private Instant deletedAt;
 
-    @Column(name = "trust_score")
+    @Column(name = "trust_score", nullable = false)
     private int trustScore = 0;
 
     @PrePersist
