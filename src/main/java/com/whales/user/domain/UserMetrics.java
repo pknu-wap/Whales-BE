@@ -21,6 +21,10 @@ public class UserMetrics {
     @MapsId
     private User user;
 
+    @Version
+    @Column(name = "version")
+    private Long version;
+
     private int postsCount;        // 작성한 게시글 수
     private int commentsCount;     // 작성한 댓글 수
     private int likesReceived;     // 받은 좋아요 수
