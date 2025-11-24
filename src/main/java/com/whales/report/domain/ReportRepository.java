@@ -11,7 +11,7 @@ public interface ReportRepository extends JpaRepository<Report, UUID> {
     List<Report> findByTargetId(UUID targetId);
 
     // 미처리 신고 목록
-    List<Report> findByStatus(ReportStatus status);
+    List<Report> findByStatusOrderByCreatedAtDesc(ReportStatus status);
 
     // 특정 유저가 신고한 기록
     List<Report> findByReporter_Id(UUID userId);

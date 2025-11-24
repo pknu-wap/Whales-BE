@@ -5,8 +5,10 @@ import com.whales.comment.domain.CommentRepository;
 import com.whales.post.domain.Post;
 import com.whales.post.domain.PostRepository;
 import com.whales.report.api.ReportRequest;
+import com.whales.report.api.ReportResponse;
 import com.whales.report.domain.Report;
 import com.whales.report.domain.ReportRepository;
+import com.whales.report.domain.ReportStatus;
 import com.whales.report.domain.ReportTargetType;
 import com.whales.user.domain.User;
 import com.whales.user.domain.UserRepository;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -49,5 +52,27 @@ public class ReportService {
 
         Report report = new Report(reporter, ReportTargetType.COMMENT, comment.getId(), request.reason());
         reportRepository.save(report);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ReportResponse> getAllReports() {
+        return reportRepository.findAll().stream()
+                .map(ReportResponse::from)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ReportResponse> getReportsByStatus(ReportStatus status) {
+        return reportRepository.findByStatusOrderByCreatedAtDesc(status).stream()
+                .map(ReportResponse::from)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public ReportResponse getReportDetail(UUID id) {
+        Report report = reportRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Report not found"));
+
+        return ReportResponse.from(report);
     }
 }
