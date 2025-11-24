@@ -35,8 +35,12 @@ public class Report {
     @Column(name = "target_id", nullable = false)
     private UUID targetId;
 
-    @Column(name = "reason", columnDefinition = "TEXT", nullable = false)
-    private String reason;
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private ReportReason reason;
+
+    @Column(name = "detail")
+    private String detail;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
@@ -51,11 +55,12 @@ public class Report {
     @Column(name = "admin_note")
     private String adminNote;
 
-    public Report(User reporter, ReportTargetType targetType, UUID targetId, String reason) {
+    public Report(User reporter, ReportTargetType targetType, UUID targetId, ReportReason reason, String detail) {
         this.reporter = reporter;
         this.targetType = targetType;
         this.targetId = targetId;
         this.reason = reason;
+        this.detail = detail;
         this.status = ReportStatus.PENDING;
     }
 

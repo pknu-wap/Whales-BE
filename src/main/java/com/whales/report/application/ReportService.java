@@ -11,6 +11,7 @@ import com.whales.report.domain.Report;
 import com.whales.report.domain.ReportRepository;
 import com.whales.report.domain.ReportStatus;
 import com.whales.report.domain.ReportTargetType;
+import com.whales.user.application.UserMetricsService;
 import com.whales.user.domain.User;
 import com.whales.user.domain.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +32,7 @@ public class ReportService {
     private final UserRepository userRepository;
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
+    private final UserMetricsService userMetricsService;
 
     @Transactional
     public void reportPost(UUID reporterId, UUID postId, ReportRequest request) {
@@ -40,7 +42,14 @@ public class ReportService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
 
-        Report report = new Report(reporter, ReportTargetType.POST, post.getId(), request.reason());
+
+        if (reportRepository.existsByReporter_IdAndTargetTypeAndTargetId(
+                reporterId, ReportTargetType.POST, postId
+        )) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 신고한 게시글입니다.");
+        }
+
+        Report report = new Report(reporter, ReportTargetType.POST, post.getId(), request.reason(), request.detail());
         reportRepository.save(report);
     }
 
@@ -52,7 +61,13 @@ public class ReportService {
         Comment comment = commentRepository.findByIdAndDeletedAtIsNull(commentId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment not found"));
 
-        Report report = new Report(reporter, ReportTargetType.COMMENT, comment.getId(), request.reason());
+        if (reportRepository.existsByReporter_IdAndTargetTypeAndTargetId(
+                reporterId, ReportTargetType.COMMENT, commentId
+        )) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 신고한 댓글입니다.");
+        }
+
+        Report report = new Report(reporter, ReportTargetType.COMMENT, comment.getId(), request.reason(), request.detail());
         reportRepository.save(report);
     }
 
@@ -104,6 +119,7 @@ public class ReportService {
                         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
                 if (post != null) {
                     post.setStatus(ContentStatus.BLOCKED); // 글 비활성화
+                    userMetricsService.increaseReportsCount(post.getAuthor().getId());
                 }
                 break;
 
@@ -112,6 +128,7 @@ public class ReportService {
                         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment not found"));
                 if (comment != null) {
                     comment.setStatus(ContentStatus.BLOCKED);
+                    userMetricsService.increaseReportsCount(comment.getAuthor().getId());
                 }
                 break;
 

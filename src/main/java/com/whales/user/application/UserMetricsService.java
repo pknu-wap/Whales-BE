@@ -1,5 +1,7 @@
 package com.whales.user.application;
 
+import com.whales.user.domain.User;
+import com.whales.user.domain.UserBadgeColor;
 import com.whales.user.domain.UserMetrics;
 import com.whales.user.domain.UserMetricsRepository;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +38,20 @@ public class UserMetricsService {
     public void increaseLikesGiven(UUID userId) {
         UserMetrics metrics = load(userId);
         metrics.increaseLikesGiven();
+    }
+
+    @Transactional
+    public void increaseReportsCount(UUID userId) {
+        UserMetrics metrics = load(userId);
+        metrics.increaseReports();
+
+        User user = metrics.getUser();
+
+        if (metrics.getReportsCount() >= 5) {
+            user.setBadgeColor(UserBadgeColor.RED);
+        } else if (metrics.getReportsCount() >= 3) {
+            user.setBadgeColor(UserBadgeColor.ORANGE);
+        }
     }
 
     private UserMetrics load(UUID userId) {

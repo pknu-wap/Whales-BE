@@ -15,4 +15,11 @@ public interface ReportRepository extends JpaRepository<Report, UUID> {
 
     // 특정 유저가 신고한 기록
     List<Report> findByReporter_Id(UUID userId);
+
+    // 중복 신고 방지
+    boolean existsByReporter_IdAndTargetTypeAndTargetId(
+            UUID reporterId,
+            ReportTargetType type,
+            UUID targetId
+    );
 }
