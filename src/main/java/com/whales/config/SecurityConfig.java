@@ -38,7 +38,15 @@ public class SecurityConfig {
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",
                                 "/auth/**"
+
                         ).permitAll()
+
+                        .requestMatchers("/ws", "/ws/**").permitAll()
+                        .requestMatchers("/api/ws", "/api/ws/**").permitAll()
+                        .requestMatchers("/ws-sockjs", "/ws-sockjs/**").permitAll()
+                        .requestMatchers("/api/ws-sockjs", "/api/ws-sockjs/**").permitAll()
+
+
                         .requestMatchers(HttpMethod.GET, "/posts", "/posts/search").permitAll()
                         // 그 외 인증 필요
                         .anyRequest().authenticated()
