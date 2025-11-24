@@ -1,4 +1,4 @@
-package com.whales.report.application;
+package com.whales.admin.application;
 
 import com.whales.comment.domain.CommentRepository;
 import com.whales.common.ContentStatus;
@@ -7,6 +7,7 @@ import com.whales.report.domain.ReportRepository;
 import com.whales.report.domain.ReportStatus;
 import com.whales.user.domain.UserBadgeColor;
 import com.whales.user.domain.UserRepository;
+import com.whales.user.domain.UserStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +34,7 @@ public class AdminDashboardService {
         map.put("blockedComments", commentRepository.countByStatus(ContentStatus.BLOCKED));
         map.put("orangeUsers", userRepository.countByBadgeColor(UserBadgeColor.ORANGE));
         map.put("redUsers", userRepository.countByBadgeColor(UserBadgeColor.RED));
+        map.put("bannedUsers", userRepository.countByStatus(UserStatus.BANNED));
         return map;
     }
 }

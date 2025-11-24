@@ -1,10 +1,11 @@
-package com.whales.report.api;
+package com.whales.admin.api;
 
+import com.whales.admin.application.AdminModerationService;
 import com.whales.comment.domain.Comment;
 import com.whales.post.domain.Post;
-import com.whales.report.application.AdminModerationService;
 import com.whales.user.domain.User;
 import com.whales.user.domain.UserBadgeColor;
+import com.whales.user.domain.UserStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -51,6 +52,17 @@ public class AdminModerationController {
     @GetMapping("/users/{badgeColor}")
     public ResponseEntity<List<AdminModerationUserResponse>> getUsersByBadgeColor(@PathVariable UserBadgeColor badgeColor) {
         List<User> users = moderationService.findUsersByBadgeColor(badgeColor);
+        return ResponseEntity.ok(
+                users.stream().map(AdminModerationUserResponse::from).toList()
+        );
+    }
+
+    /**
+     * Status별 유저 목록
+     */
+    @GetMapping("/users/{status}")
+    public ResponseEntity<List<AdminModerationUserResponse>> getUsersByStatus(@PathVariable UserStatus status) {
+        List<User> users = moderationService.findUsersByStatus(status);
         return ResponseEntity.ok(
                 users.stream().map(AdminModerationUserResponse::from).toList()
         );

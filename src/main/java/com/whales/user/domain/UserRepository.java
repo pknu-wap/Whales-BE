@@ -10,4 +10,8 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     Optional<User> findByEmail(String email);
     long countByBadgeColor(UserBadgeColor color);
     List<User> findByBadgeColor(UserBadgeColor badgeColor);
+
+    List<User> findUserByStatus(UserStatus status);
+
+    Long countByStatus(UserStatus status);
 }

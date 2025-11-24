@@ -1,11 +1,11 @@
-package com.whales.report.application;
+package com.whales.admin.application;
 
+import com.whales.admin.api.ReportResponse;
 import com.whales.comment.domain.Comment;
 import com.whales.comment.domain.CommentRepository;
 import com.whales.common.ContentStatus;
 import com.whales.post.domain.Post;
 import com.whales.post.domain.PostRepository;
-import com.whales.report.api.ReportResponse;
 import com.whales.report.domain.Report;
 import com.whales.report.domain.ReportRepository;
 import com.whales.report.domain.ReportStatus;

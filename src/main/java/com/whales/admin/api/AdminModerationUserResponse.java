@@ -1,4 +1,4 @@
-package com.whales.report.api;
+package com.whales.admin.api;
 
 import com.whales.user.domain.User;
 import com.whales.user.domain.UserBadgeColor;

@@ -1,4 +1,4 @@
-package com.whales.report.application;
+package com.whales.admin.application;
 
 import com.whales.comment.domain.Comment;
 import com.whales.comment.domain.CommentRepository;
@@ -8,6 +8,7 @@ import com.whales.post.domain.PostRepository;
 import com.whales.user.domain.User;
 import com.whales.user.domain.UserBadgeColor;
 import com.whales.user.domain.UserRepository;
+import com.whales.user.domain.UserStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,5 +36,10 @@ public class AdminModerationService {
     @Transactional(readOnly = true)
     public List<User> findUsersByBadgeColor(UserBadgeColor badgeColor) {
         return userRepository.findByBadgeColor(badgeColor);
+    }
+
+    @Transactional(readOnly = true)
+    public List<User> findUsersByStatus(UserStatus status) {
+        return userRepository.findUserByStatus(status);
     }
 }

@@ -1,4 +1,4 @@
-package com.whales.report.api;
+package com.whales.admin.api;
 
 import com.whales.report.domain.Report;
 import com.whales.report.domain.ReportReason;

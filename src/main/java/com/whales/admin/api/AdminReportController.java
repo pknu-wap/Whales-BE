@@ -1,6 +1,6 @@
-package com.whales.report.api;
+package com.whales.admin.api;
 
-import com.whales.report.application.AdminReportService;
+import com.whales.admin.application.AdminReportService;
 import com.whales.report.domain.ReportStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
