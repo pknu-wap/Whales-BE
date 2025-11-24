@@ -30,7 +30,6 @@ public class UserController {
     @PutMapping("/me")
     public ResponseEntity<UserResponse> updateMe(@AuthenticationPrincipal WhalesUserPrincipal principal,
                                                  @Valid @RequestBody UpdateProfileRequest request) {
-        if (principal == null) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
 
         UserResponse dto = userService.updateProfile(principal.getId(), request);
         return ResponseEntity.ok(dto);
