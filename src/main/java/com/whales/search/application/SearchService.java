@@ -83,4 +83,24 @@ public class SearchService {
 
         return historyRepository.findByUserOrderBySearchedAtDesc(user);
     }
+    /** 검색 기록 단일 삭제 */
+    public void deleteHistory(UUID historyId, UUID userId) {
+        SearchHistory history = historyRepository.findById(historyId)
+                .orElseThrow(() -> new IllegalArgumentException("History not found: " + historyId));
+
+        if (!history.getUser().getId().equals(userId)) {
+            // 다른 사람 기록 삭제 방지
+            throw new IllegalArgumentException("Not allowed to delete this history");
+        }
+
+        historyRepository.delete(history);
+    }
+
+    /** 검색 기록 전체 삭제 */
+    public void clearHistory(UUID userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
+
+        historyRepository.deleteAllByUser(user);
+    }
 }
