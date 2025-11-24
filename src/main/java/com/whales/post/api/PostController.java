@@ -60,8 +60,9 @@ public class PostController {
     // 게시물 삭제
     @DeleteMapping("/{postId}")
     public ResponseEntity<Void> deletePost(@PathVariable UUID postId,
-                                           @AuthenticationPrincipal WhalesUserPrincipal principal) {
-        postService.deletePost(postId, principal.getId());
+                                           @AuthenticationPrincipal WhalesUserPrincipal principal,
+                                           @RequestParam(name = "hard", defaultValue = "false") boolean hard) {
+        postService.deletePost(postId, principal.getId(), hard);
         return ResponseEntity.noContent().build();
     }
 

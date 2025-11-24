@@ -1,6 +1,7 @@
 package com.whales.post.application;
 
 import com.whales.comment.domain.CommentRepository;
+import com.whales.common.ContentStatus;
 import com.whales.post.api.CreatePostRequest;
 import com.whales.post.api.PostResponse;
 import com.whales.post.api.UpdatePostRequest;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -38,10 +40,10 @@ public class PostService {
     // 전체 조회
     public List<PostResponse> getAllPosts() {
         return postRepository.findAll().stream()
+                .filter(post -> post.getStatus() == ContentStatus.ACTIVE) // BLOCKED 제외
                 .map(post -> {
                     long commentCount = commentRepository.countByPost_Id(post.getId());
                     ReactionSummary reactions = postReactionService.getReactionSummaryWithoutUser(post.getId());
-
                     return PostResponse.from(post, commentCount, reactions);
                 })
                 .collect(Collectors.toList());
@@ -51,14 +53,18 @@ public class PostService {
     public PostResponse getPostById(UUID postId, UUID userId) {
         Post post = loadPost(postId);
 
+        // BLOCKED 글은 접근 차단
+        if (post.getStatus() == ContentStatus.BLOCKED) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "This post is blocked by moderation.");
+        }
+
         long commentCount = commentRepository.countByPost_Id(post.getId());
         ReactionSummary reactions = postReactionService.getReactionSummary(postId, userId);
+
         return PostResponse.from(post, commentCount, reactions);
     }
 
-    /**
-     * 게시글 생성 + 태그 처리
-     */
+    // 게시글 생성
     @Transactional
     public PostResponse createPost(UUID authorId, CreatePostRequest request) {
         User author = loadAuthor(authorId);
@@ -74,7 +80,6 @@ public class PostService {
             tagService.addTags(saved.getId(), authorId, new TagListRequest(request.tags()));
         }
 
-        // 태그 반영된 최신 엔티티 다시 조회
         Post refreshed = postRepository.findByIdWithTagsAndAuthor(saved.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
@@ -82,12 +87,11 @@ public class PostService {
 
         long commentCount = 0;
         ReactionSummary reactions = postReactionService.getReactionSummaryWithoutUser(refreshed.getId());
+
         return PostResponse.from(refreshed, commentCount, reactions);
     }
 
-    /**
-     * 게시글 수정 + 태그 교체
-     */
+    // 게시글 수정
     @Transactional
     public PostResponse updatePost(UUID id, UUID authorId, UpdatePostRequest request) {
         Post post = loadPostWithAuth(id, authorId);
@@ -111,20 +115,28 @@ public class PostService {
 
     // 삭제
     @Transactional
-    public void deletePost(UUID id, UUID authorId) {
+    public void deletePost(UUID id, UUID authorId, boolean softDelete) {
         Post post = loadPostWithAuth(id, authorId);
-        postRepository.delete(post);
+
+        if (softDelete) {
+            post.setDeletedAt(Instant.now());
+            post.setStatus(ContentStatus.DELETED);
+            postRepository.save(post);
+        } else {
+            postRepository.delete(post);
+        }
     }
 
+    // 검색
     @Transactional(readOnly = true)
     public List<PostResponse> searchPosts(String query) {
         List<Post> results = postRepository.searchByKeyword(query);
 
         return results.stream()
+                .filter(post -> post.getStatus() == ContentStatus.ACTIVE) // BLOCKED 제외
                 .map(post -> {
                     long commentCount = commentRepository.countByPost_Id(post.getId());
                     ReactionSummary reactions = postReactionService.getReactionSummaryWithoutUser(post.getId());
-
                     return PostResponse.from(post, commentCount, reactions);
                 })
                 .collect(Collectors.toList());
@@ -132,12 +144,12 @@ public class PostService {
 
     // ---------- helpers ----------
     private Post loadPostWithAuth(UUID postId, UUID authorId) {
-        Post post = postRepository.findByIdWithTagsAndAuthor(postId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
+        Post post = loadPost(postId);
 
-        if (post.getAuthor() == null || !post.getAuthor().getId().equals(authorId)) {
+        if (!post.getAuthor().getId().equals(authorId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only author can manage posts");
         }
+
         return post;
     }
 
