@@ -5,10 +5,7 @@ import com.whales.report.domain.ReportStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
@@ -27,7 +24,7 @@ public class AdminReportController {
         return ResponseEntity.ok(reportService.getAllReports());
     }
 
-    // 상태별 조회 (PENDING / REVIEWED / REJECTED)
+    // 상태별 조회 (PENDING / ACCEPTED / REJECTED)
     @GetMapping("/status/{status}")
     public ResponseEntity<List<ReportResponse>> getReportsByStatus(@PathVariable ReportStatus status) {
         return ResponseEntity.ok(reportService.getReportsByStatus(status));
@@ -37,5 +34,12 @@ public class AdminReportController {
     @GetMapping("/{id}")
     public ResponseEntity<ReportResponse> getReportDetail(@PathVariable UUID id) {
         return ResponseEntity.ok(reportService.getReportDetail(id));
+    }
+
+    @PatchMapping("/{id}/process")
+    public ResponseEntity<Void> processReport(@PathVariable UUID id,
+                                              @RequestBody ReportProcessRequest request) {
+        reportService.processReport(id, request.status(), request.note());
+        return ResponseEntity.noContent().build();
     }
 }

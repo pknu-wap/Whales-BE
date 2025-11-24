@@ -4,12 +4,14 @@ import com.whales.user.domain.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.Instant;
 import java.util.UUID;
 
 @Entity
 @Getter
+@Setter
 @NoArgsConstructor
 @Table(name = "reports")
 public class Report {
@@ -45,6 +47,9 @@ public class Report {
 
     @Column(name = "resolved_at")
     private Instant resolvedAt;
+
+    @Column(name = "admin_note")
+    private String adminNote;
 
     public Report(User reporter, ReportTargetType targetType, UUID targetId, String reason) {
         this.reporter = reporter;

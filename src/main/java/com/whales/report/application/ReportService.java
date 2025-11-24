@@ -2,6 +2,7 @@ package com.whales.report.application;
 
 import com.whales.comment.domain.Comment;
 import com.whales.comment.domain.CommentRepository;
+import com.whales.common.ContentStatus;
 import com.whales.post.domain.Post;
 import com.whales.post.domain.PostRepository;
 import com.whales.report.api.ReportRequest;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -74,5 +76,52 @@ public class ReportService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Report not found"));
 
         return ReportResponse.from(report);
+    }
+
+    @Transactional
+    public void processReport(UUID id, ReportStatus status, String adminNote) {
+        Report report = reportRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Report not found"));
+
+        if (report.getStatus() != ReportStatus.PENDING) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Report has already been processed");
+        }
+
+        report.setStatus(status);
+        report.setAdminNote(adminNote);
+        report.setResolvedAt(Instant.now());
+
+        if (status == ReportStatus.ACCEPTED) {
+            applyModerationAction(report);
+        }
+    }
+
+    private void applyModerationAction(Report report) {
+
+        switch (report.getTargetType()) {
+            case POST:
+                Post post = postRepository.findById(report.getTargetId())
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
+                if (post != null) {
+                    post.setStatus(ContentStatus.BLOCKED); // 글 비활성화
+                }
+                break;
+
+            case COMMENT:
+                Comment comment = commentRepository.findById(report.getTargetId())
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment not found"));
+                if (comment != null) {
+                    comment.setStatus(ContentStatus.BLOCKED);
+                }
+                break;
+
+//            case USER:
+//                User user = userRepository.findById(report.getTargetId())
+//                        .orElse(null);
+//                if (user != null) {
+//                    user.setStatus(UserStatus.BANNED);
+//                }
+//                break;
+        }
     }
 }
