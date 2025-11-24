@@ -29,6 +29,12 @@ public class User {
     @Column(name = "display_name", length = 40, nullable = false)
     private String displayName;
 
+    @Column(name = "last_display_name_change")
+    private Instant lastDisplayNameChange;
+
+    @Column(name = "bio", length = 200)
+    private String bio;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "badge_color", nullable = false, length = 16)
     private UserBadgeColor badgeColor = UserBadgeColor.WHITE;
@@ -64,6 +70,10 @@ public class User {
     void onCreate() {
         this.createdAt = Instant.now();
         this.updatedAt = Instant.now();
+
+        if (this.lastDisplayNameChange == null) {
+            this.lastDisplayNameChange = Instant.now();
+        }
     }
 
     @PreUpdate
