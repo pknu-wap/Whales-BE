@@ -22,4 +22,6 @@ public interface ReportRepository extends JpaRepository<Report, UUID> {
             ReportTargetType type,
             UUID targetId
     );
+
+    Long countByStatus(ReportStatus status);
 }

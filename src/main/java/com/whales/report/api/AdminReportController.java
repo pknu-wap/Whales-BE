@@ -1,6 +1,6 @@
 package com.whales.report.api;
 
-import com.whales.report.application.ReportService;
+import com.whales.report.application.AdminReportService;
 import com.whales.report.domain.ReportStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +16,7 @@ import java.util.UUID;
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminReportController {
 
-    private final ReportService reportService;
+    private final AdminReportService reportService;
 
     // 전체 신고 조회
     @GetMapping
@@ -42,6 +42,7 @@ public class AdminReportController {
         return ResponseEntity.ok(reportService.getReportDetail(id));
     }
 
+    // 신고 처리
     @PatchMapping("/{id}/process")
     public ResponseEntity<Void> processReport(@PathVariable UUID id,
                                               @RequestBody ReportProcessRequest request) {

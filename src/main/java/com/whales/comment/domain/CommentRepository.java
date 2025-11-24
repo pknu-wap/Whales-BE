@@ -1,5 +1,6 @@
 package com.whales.comment.domain;
 
+import com.whales.common.ContentStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -16,4 +17,8 @@ public interface CommentRepository extends JpaRepository<Comment, UUID> {
     List<Comment> findByAuthor_IdAndDeletedAtIsNullAndStatusOrderByCreatedAtDesc(UUID userId, Enum<?> status);
 
     long countByPost_Id(UUID postId);
+
+    List<Comment> findByStatus(ContentStatus status);
+
+    Long countByStatus(ContentStatus status);
 }
