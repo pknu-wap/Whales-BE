@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 import java.util.UUID;
@@ -62,5 +64,26 @@ public class SearchController {
                 .stream()
                 .map(SearchHistoryResponse::from)
                 .toList();
+    }
+
+    /** 검색 기록 단일 삭제 */
+    @DeleteMapping("/history/{historyId}")
+    public void deleteHistory(
+            @PathVariable UUID historyId,
+            @AuthenticationPrincipal WhalesUserPrincipal principal
+    ) {
+        if (principal == null) return;
+
+        searchService.deleteHistory(historyId, principal.getId());
+    }
+
+    /** 검색 기록 전체 삭제 */
+    @DeleteMapping("/history")
+    public void clearHistory(
+            @AuthenticationPrincipal WhalesUserPrincipal principal
+    ) {
+        if (principal == null) return;
+
+        searchService.clearHistory(principal.getId());
     }
 }
