@@ -24,6 +24,12 @@ public class AdminReportController {
         return ResponseEntity.ok(reportService.getAllReports());
     }
 
+    // 특정 대상(Post or Comment)에 대한 모든 신고 조회
+    @GetMapping("/{targetId}")
+    public ResponseEntity<List<ReportResponse>> getReportsByReportId(@PathVariable UUID targetId) {
+        return ResponseEntity.ok(reportService.getReportsByTargetId(targetId));
+    }
+
     // 상태별 조회 (PENDING / ACCEPTED / REJECTED)
     @GetMapping("/status/{status}")
     public ResponseEntity<List<ReportResponse>> getReportsByStatus(@PathVariable ReportStatus status) {
@@ -31,7 +37,7 @@ public class AdminReportController {
     }
 
     // 신고 상세 조회
-    @GetMapping("/{id}")
+    @GetMapping("/{id}/detail")
     public ResponseEntity<ReportResponse> getReportDetail(@PathVariable UUID id) {
         return ResponseEntity.ok(reportService.getReportDetail(id));
     }

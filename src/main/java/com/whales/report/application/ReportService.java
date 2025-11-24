@@ -79,6 +79,13 @@ public class ReportService {
     }
 
     @Transactional(readOnly = true)
+    public List<ReportResponse> getReportsByTargetId(UUID targetId) {
+        return reportRepository.findByTargetId(targetId).stream()
+                .map(ReportResponse::from)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
     public List<ReportResponse> getReportsByStatus(ReportStatus status) {
         return reportRepository.findByStatusOrderByCreatedAtDesc(status).stream()
                 .map(ReportResponse::from)
