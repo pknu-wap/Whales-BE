@@ -1,5 +1,6 @@
 package com.whales.post.domain;
 
+import com.whales.common.ContentStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -64,4 +65,8 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
     List<Post> searchByTagsAndKeyword(@Param("names") List<String> names,
                                       @Param("tagCount") Integer tagCount,
                                       @Param("keyword") String keyword);
+
+    List<Post> findByStatus(ContentStatus status);
+
+    Long countByStatus(ContentStatus status);
 }
