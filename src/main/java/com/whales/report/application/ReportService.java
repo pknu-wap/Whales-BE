@@ -74,21 +74,21 @@ public class ReportService {
     @Transactional(readOnly = true)
     public List<ReportResponse> getAllReports() {
         return reportRepository.findAll().stream()
-                .map(ReportResponse::from)
+                .map(this::toResponse)
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public List<ReportResponse> getReportsByTargetId(UUID targetId) {
         return reportRepository.findByTargetId(targetId).stream()
-                .map(ReportResponse::from)
+                .map(this::toResponse)
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public List<ReportResponse> getReportsByStatus(ReportStatus status) {
         return reportRepository.findByStatusOrderByCreatedAtDesc(status).stream()
-                .map(ReportResponse::from)
+                .map(this::toResponse)
                 .toList();
     }
 
@@ -97,7 +97,7 @@ public class ReportService {
         Report report = reportRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Report not found"));
 
-        return ReportResponse.from(report);
+        return toResponse(report);
     }
 
     @Transactional
@@ -147,5 +147,61 @@ public class ReportService {
 //                }
 //                break;
         }
+    }
+
+    /**
+     * Report → ReportResponse 변환
+     */
+    private ReportResponse toResponse(Report report) {
+        String targetSummary = resolveTargetSummary(report);
+
+        // 대상 작성자 정보 가져오기
+        User targetAuthor = resolveTargetAuthor(report);
+
+        return ReportResponse.from(
+                report,
+                targetSummary,
+                targetAuthor != null ? targetAuthor.getId() : null,
+                targetAuthor != null ? targetAuthor.getDisplayName() : "(알 수 없음)"
+        );
+    }
+
+    /**
+     * 신고 대상의 작성자 식별
+     */
+    private User resolveTargetAuthor(Report report) {
+
+        if (report.getTargetType() == ReportTargetType.POST) {
+            return postRepository.findById(report.getTargetId())
+                    .map(Post::getAuthor)
+                    .orElse(null);
+        }
+
+        if (report.getTargetType() == ReportTargetType.COMMENT) {
+            return commentRepository.findById(report.getTargetId())
+                    .map(Comment::getAuthor)
+                    .orElse(null);
+        }
+
+        return null;
+    }
+
+    /**
+     * 신고 대상 요약 텍스트 생성
+     */
+    private String resolveTargetSummary(Report report) {
+        if (report.getTargetType() == ReportTargetType.POST) {
+            return postRepository.findById(report.getTargetId())
+                    .map(Post::getTitle)
+                    .orElse("(삭제된 게시글)");
+        }
+
+        if (report.getTargetType() == ReportTargetType.COMMENT) {
+            return commentRepository.findById(report.getTargetId())
+                    .map(c -> c.getBody().substring(0, Math.min(30, c.getBody().length())))
+                    .orElse("(삭제된 댓글)");
+        }
+
+        return "(알 수 없음)";
     }
 }
