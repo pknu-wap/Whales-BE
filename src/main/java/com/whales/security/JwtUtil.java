@@ -43,8 +43,6 @@ public class JwtUtil {
                 .setSubject(userId.toString())
                 .setIssuedAt(Date.from(now))
                 .setExpiration(Date.from(exp))
-                .claim("email", email)
-                .claim("role", role)
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -60,7 +58,5 @@ public class JwtUtil {
                 .getBody();
     }
 
-    public String extractRole(Claims claims) { return claims.get("role", String.class); }
-    public String extractEmail(Claims claims) { return claims.get("email", String.class); }
     public UUID extractUserId(Claims claims) { return UUID.fromString(claims.getSubject()); }
 }

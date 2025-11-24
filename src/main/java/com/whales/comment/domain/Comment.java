@@ -75,6 +75,4 @@ public class Comment {
     void onUpdate() {
         this.updatedAt = Instant.now();
     }
-
-    public boolean isDeleted() { return deletedAt != null; }
 }
