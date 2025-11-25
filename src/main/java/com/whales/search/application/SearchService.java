@@ -103,6 +103,6 @@ public class SearchService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
 
-        historyRepository.deleteAllByUser_Id(userId);
+        historyRepository.deleteAllByUser(user);
     }
 }
