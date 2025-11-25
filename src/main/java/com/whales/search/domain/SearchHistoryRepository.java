@@ -13,5 +13,5 @@ public interface SearchHistoryRepository extends JpaRepository<SearchHistory, UU
 
     Optional<SearchHistory> findByUserAndKeyword(User user, String keyword);
 
-    void deleteAllByUser(User user);
+    void deleteAllByUser_Id(UUID userId);
 }
