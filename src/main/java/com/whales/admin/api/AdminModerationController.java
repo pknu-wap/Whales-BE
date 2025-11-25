@@ -6,6 +6,8 @@ import com.whales.post.domain.Post;
 import com.whales.user.domain.User;
 import com.whales.user.domain.UserBadgeColor;
 import com.whales.user.domain.UserStatus;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,13 +22,12 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/admin/moderation")
 @PreAuthorize("hasRole('ADMIN')")
+@Tag(name = "Admin Moderation API", description = "관리자용 차단 콘텐츠 및 위험 유저 관리 API")
 public class AdminModerationController {
 
     private final AdminModerationService moderationService;
 
-    /**
-     * 차단된 게시글 목록
-     */
+    @Operation(summary = "차단된 게시글 목록 조회")
     @GetMapping("/posts")
     public ResponseEntity<List<AdminModerationPostResponse>> getBlockedPosts() {
         List<Post> posts = moderationService.getBlockedPosts();
@@ -35,9 +36,7 @@ public class AdminModerationController {
         );
     }
 
-    /**
-     * 차단된 댓글 목록
-     */
+    @Operation(summary = "차단된 댓글 목록 조회")
     @GetMapping("/comments")
     public ResponseEntity<List<AdminModerationCommentResponse>> getBlockedComments() {
         List<Comment> comments = moderationService.getBlockedComments();
@@ -46,9 +45,7 @@ public class AdminModerationController {
         );
     }
 
-    /**
-     * BadgeColor별 유저 목록
-     */
+    @Operation(summary = "BadgeColor 기준 위험 유저 조회")
     @GetMapping("/users/badge/{badgeColor}")
     public ResponseEntity<List<AdminModerationUserResponse>> getUsersByBadgeColor(@PathVariable UserBadgeColor badgeColor) {
         List<User> users = moderationService.findUsersByBadgeColor(badgeColor);
@@ -57,9 +54,7 @@ public class AdminModerationController {
         );
     }
 
-    /**
-     * Status별 유저 목록
-     */
+    @Operation(summary = "Status 기준 유저 조회")
     @GetMapping("/users/status/{status}")
     public ResponseEntity<List<AdminModerationUserResponse>> getUsersByStatus(@PathVariable UserStatus status) {
         List<User> users = moderationService.findUsersByStatus(status);

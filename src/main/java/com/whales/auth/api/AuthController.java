@@ -3,6 +3,8 @@ package com.whales.auth.api;
 import com.whales.auth.application.AuthResult;
 import com.whales.auth.application.AuthService;
 import com.whales.security.WhalesUserPrincipal;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -20,10 +22,15 @@ import java.time.Duration;
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
+@Tag(name = "Auth API", description = "로그인, 토큰 재발급, 로그아웃 등 인증 관련 API")
 public class AuthController {
 
     private final AuthService authService;
 
+    @Operation(
+            summary = "구글 OAuth2 로그인",
+            description = "구글 인증 코드를 전달받아 액세스 토큰 및 리프레시 토큰을 발급합니다."
+    )
     @PostMapping("/login/google")
     public ResponseEntity<LoginResponse> loginGoogle(
             @Valid @RequestBody GoogleLoginRequest request,
@@ -54,6 +61,10 @@ public class AuthController {
         );
     }
 
+    @Operation(
+            summary = "AccessToken 재발급",
+            description = "HttpOnly 쿠키로 저장된 RefreshToken을 이용해 새 AccessToken을 발급합니다."
+    )
     @PostMapping("/refresh")
     public ResponseEntity<LoginResponse> refresh(
             @CookieValue(name = "refreshToken", required = false) String refreshToken,
@@ -81,6 +92,10 @@ public class AuthController {
         );
     }
 
+    @Operation(
+            summary = "로그아웃",
+            description = "현재 기기 또는 모든 기기 세션을 종료하고 RefreshToken 쿠키를 삭제합니다."
+    )
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(
             @AuthenticationPrincipal WhalesUserPrincipal principal,
