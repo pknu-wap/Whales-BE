@@ -1,10 +1,10 @@
 package com.whales.report.api;
 
 import com.whales.report.domain.ReportReason;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public record ReportRequest(
-        @NotBlank ReportReason reason,
+        @NotNull ReportReason reason,
         String detail
 ) {
 }

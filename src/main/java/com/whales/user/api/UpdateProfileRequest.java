@@ -7,5 +7,8 @@ public record UpdateProfileRequest(
         String displayName,
 
         @Size(max = 2048)
-        String avatarUrl
+        String avatarUrl,
+
+        @Size(max = 200)
+        String bio
 ) {}
