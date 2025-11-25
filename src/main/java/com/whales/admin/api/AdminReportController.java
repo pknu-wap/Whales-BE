@@ -25,7 +25,7 @@ public class AdminReportController {
     }
 
     // 특정 대상(Post or Comment)에 대한 모든 신고 조회
-    @GetMapping("/{targetId}")
+    @GetMapping("/target/{targetId}")
     public ResponseEntity<List<ReportResponse>> getReportsByReportId(@PathVariable UUID targetId) {
         return ResponseEntity.ok(reportService.getReportsByTargetId(targetId));
     }

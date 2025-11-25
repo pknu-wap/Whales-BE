@@ -49,7 +49,7 @@ public class AdminModerationController {
     /**
      * BadgeColor별 유저 목록
      */
-    @GetMapping("/users/{badgeColor}")
+    @GetMapping("/users/badge/{badgeColor}")
     public ResponseEntity<List<AdminModerationUserResponse>> getUsersByBadgeColor(@PathVariable UserBadgeColor badgeColor) {
         List<User> users = moderationService.findUsersByBadgeColor(badgeColor);
         return ResponseEntity.ok(
@@ -60,7 +60,7 @@ public class AdminModerationController {
     /**
      * Status별 유저 목록
      */
-    @GetMapping("/users/{status}")
+    @GetMapping("/users/status/{status}")
     public ResponseEntity<List<AdminModerationUserResponse>> getUsersByStatus(@PathVariable UserStatus status) {
         List<User> users = moderationService.findUsersByStatus(status);
         return ResponseEntity.ok(
