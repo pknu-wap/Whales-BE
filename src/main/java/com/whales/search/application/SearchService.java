@@ -7,6 +7,7 @@ import com.whales.search.domain.SearchHistoryRepository;
 import com.whales.search.domain.SearchKeywordParser;
 import com.whales.user.domain.User;
 import com.whales.user.domain.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -97,10 +98,11 @@ public class SearchService {
     }
 
     /** 검색 기록 전체 삭제 */
+    @Transactional
     public void clearHistory(UUID userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
 
-        historyRepository.deleteAllByUser(user);
+        historyRepository.deleteAllByUser_Id(userId);
     }
 }
