@@ -39,7 +39,7 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/auth/**"
                         ).permitAll()
-                        .requestMatchers(HttpMethod.GET, "/posts", "/posts/search", "/{postId}/reactions").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/posts", "/posts/search").permitAll()
                         // 그 외 인증 필요
                         .anyRequest().authenticated()
                 )
